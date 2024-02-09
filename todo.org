@@ -1,0 +1,29 @@
+#+title:Rouge Galaxy
+#+subtitle:Todo
+#+author: Paul Geerken
+#+setupfile: ~/Uni/setupfile_ha.org
+* Game.c
+- draw function -> iterate entity list
+- gameloop
+- game struct
+
+* interface.c
+- ncurces.h
+- draw char with color
+- draw array (with color)
+
+* entity.c
+- entity struct
+  - ID
+  - char
+  - pos
+
+* math.c
+- [X] ivec2
+- [X] imat22
+- [X] fcross2
+- [X] fdot2
+- [X] fdist2
+
+* tests
+** write unittests using check
