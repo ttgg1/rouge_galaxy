@@ -2,17 +2,18 @@
 #define VECMATH_H_
 
 #include <math.h>
+#include <stdint.h>
 
 typedef struct ivec2 {
-  int x;
-  int y;
+  uint8_t x;
+  uint8_t y;
 } ivec2_t;
 
 typedef struct imat22 {
-  int a11;
-  int a12;
-  int a21;
-  int a22;
+  uint8_t a11;
+  uint8_t a12;
+  uint8_t a21;
+  uint8_t a22;
 } imat22_t;
 
 // common vector operations

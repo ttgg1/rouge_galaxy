@@ -1,6 +1,5 @@
 #+title:Rouge Galaxy
 #+subtitle:Todo
-#+author: Paul Geerken
 #+setupfile: ~/Uni/setupfile_ha.org
 * Game.c
 - draw function -> iterate entity list
@@ -26,4 +25,4 @@
 - [X] fdist2
 
 * tests
-** write unittests using check
+** write unittests
