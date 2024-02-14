@@ -1,9 +1,13 @@
 #+title:Rouge Galaxy
 #+subtitle:Todo
 #+setupfile: ~/Uni/setupfile_ha.org
+
+2D - Rouglike turn based dungeon crawler
+
 * Game.c
 - draw function -> iterate entity list
-- gameloop
+- gameloop -> turn based mode
+- if no encounter -> real time mode -> bool isTurnBased in gamestruct
 - game struct
 
 * interface.c
@@ -11,11 +15,31 @@
 - draw char with color
 - draw array (with color)
 
+* Procedrual dungeon generation with WFC
+
+* enemy.c
+- handle fights with the player
+- random skills and levels with the player
+- hard
+
+* fight.c
+- turn bases fight
+- extensive skill/spell system (space themed: spells -> "science gadgets")
+
+* player.c
+- handle player events
+
+* level.c
+- handle level progression of player
+- binary tree like
+- very customizable/broad spectrum of effects
+
 * entity.c
-- entity struct
-  - ID
-  - char
-  - pos
+- gets drawn on the screen
+- [X] entity struct
+  - [X] ID
+  - [X] char
+  - [X] pos
 
 * math.c
 - [X] ivec2
