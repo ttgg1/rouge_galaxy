@@ -14,12 +14,13 @@ typedef struct interface {
   WINDOW *win;
 } interface_t;
 
-interface_t in_create(uint8_t width, uint8_t height);
+interface_t in_create(uint8_t cols, uint8_t lines);
 void in_destroy(interface_t *in);
 
 void in_drawAt(interface_t *in, chtype c, ivec2_t pos);
 
 // needs to be called AFTER draw calls
 void in_drawRefresh(interface_t *in);
+void in_clearScreen(void);
 
 #endif // INTERFACE_H_

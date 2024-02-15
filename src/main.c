@@ -8,10 +8,10 @@
 int main(int argc, char **argv) {
   game_t game = gm_init(200, 100);
 
-  entity_t ent = {0, {2, 2}, {0, 0}, 'E' | A_BOLD};
+  entity_t ent = {0, {20, 20}, {0, 0}, 'E' | A_BLINK | COLOR_PAIR(2)};
 
-  gm_start(&game);
   gm_addEntity(&ent, &game);
+  gm_start(&game);
 
   return 0;
 }

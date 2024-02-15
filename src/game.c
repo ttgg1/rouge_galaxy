@@ -1,4 +1,5 @@
 #include "game.h"
+#include "interface.h"
 
 uint8_t num_entities;
 
@@ -10,7 +11,7 @@ void draw(game_t *g) {
   }
   in_drawRefresh(g->in);
 }
-
+// TODO
 void handleEvents(game_t *g) {}
 
 void loop(game_t *g) {
@@ -28,6 +29,7 @@ void gm_start(game_t *g) {
 void gm_stop(game_t *g) {
   g->isRunning = false;
   free(g->en_list);
+  in_destroy(g->in);
 }
 
 void gm_addEntity(entity_t *e, game_t *g) {
@@ -52,9 +54,12 @@ void gm_addEntity(entity_t *e, game_t *g) {
 
 game_t gm_init(uint8_t window_w, uint8_t window_h) {
   game_t g;
+  interface_t inter;
 
   // create text interface and store it in game struct
-  *g.in = in_create(window_w, window_h);
+  inter = in_create(window_w, window_h);
+
+  g.in = &inter;
 
   // leave entity list empty for now
   num_entities = 0;
