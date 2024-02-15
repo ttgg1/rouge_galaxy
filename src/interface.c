@@ -1,62 +1,67 @@
 #include "interface.h"
-#include "utils.h"
-#include "vecMath.h"
-#include <ncurses.h>
+#include "SDL_render.h"
+#include "SDL_ttf.h"
+#include "SDL_video.h"
 
-interface_t in_create(uint8_t cols, uint8_t lines) {
+interface_t in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   interface_t res;
 
-  res.w = cols;
-  res.h = lines;
+  res.w = grid_w;
+  res.h = grid_h;
 
-  // current terminal screen size
-  uint8_t term_w, term_h;
+  // init SDL2 & SDL2_ttf
 
-  getmaxyx(stdscr, term_h, term_w);
-
-  // check if Window fits inside the Terminal
-  if (res.w > term_w) {
-    debug_print("Window-Width doesnt fit in Terminal !");
-    res.w = term_w;
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    debug_print("SDL2 Failed to intitialize Video: %s \n", SDL_GetError());
   }
-  if (res.h > term_h) {
-    debug_print("Window-height doesnt fit in Terminal !");
-    res.h = term_h;
+  if (TTF_Init() < 0) {
+    debug_print("SDL2_ttf Failed to intitialize: %s \n", SDL_GetError());
   }
 
-  res.pixels = malloc(res.w * res.h * sizeof(char));
+  // Open Font
+  res.f = TTF_OpenFont("../../assets/FiraMono.ttf", (int)ptsize);
+  if (res.f == NULL) {
+    debug_print("SDL2_ttf Failed to intitialize the Font: %s \n",
+                SDL_GetError());
+  }
 
-  // intit ncurses
-  initscr();
-  cbreak();
-  noecho();
-  keypad(stdscr, TRUE);
+  // get grid_cell_w and h
+  if (TTF_SizeUTF8(res.f, " ", (int *)&res.grid_cell_w,
+                   (int *)&res.grid_cell_h) < 0) {
+    debug_print("SDL2_ttf Failed to fetch the Fontsize: %s \n", SDL_GetError());
+  }
 
-  // create ncurses Window
-  res.win = newwin(res.w, res.h, 0, 0);
+  // create SDL window and renderer
+  int win_w = res.w * res.grid_cell_w;
+  int win_h = res.h * res.grid_cell_h;
+
+  if (SDL_CreateWindowAndRenderer(win_w, win_h, NULL, &res.win, &res.r) < 0) {
+    debug_print("SDL2 Failed to intitialize Window and/or Renderer: %s \n",
+                SDL_GetError());
+  }
+
+  // init Grid
+  res.grid = malloc(res.w * res.h * sizeof(char));
 
   return res;
 }
 
 void in_destroy(interface_t *in) {
-  free(in->pixels);
-  delwin(in->win);
-  endwin();
+  free(in->grid);
+
+  TTF_CloseFont(in->f);
+  TTF_Quit();
+
+  SDL_DestroyRenderer(in->r);
+  SDL_DestroyWindow(in->win);
+  SDL_Quit();
 }
 
-void in_drawAt(interface_t *in, chtype c, ivec2_t pos) {
-  // save current curser pos
-  ivec2_t old_pos;
-  getyx(in->win, old_pos.y, old_pos.x);
+void in_drawAt(interface_t *in, char c, ivec2_t pos) {
+  int index = pos.x + pos.y * in->w;
 
-  printf("old_x: %d, old_y: %d\n", old_pos.x, old_pos.y);
-
-  // move cursor and draw char
-  mvwaddch(in->win, pos.y, pos.x, c);
-
-  // move back to orgiginal position
-  wmove(in->win, old_pos.y, old_pos.x);
+  in->grid[index] = c;
 }
-void in_drawRefresh(interface_t *in) { wrefresh(in->win); }
+void in_drawPresent(interface_t *in) { SDL_RenderPresent(in->r); }
 
-void in_clearScreen(void) { wrefresh(stdscr); }
+void in_clearScreen(interface_t *in) { SDL_RenderClear(in->r); }

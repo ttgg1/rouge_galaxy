@@ -6,9 +6,9 @@
 #include "vecMath.h"
 
 int main(int argc, char **argv) {
-  game_t game = gm_init(200, 100);
+  game_t game = gm_init(20, 20, 20);
 
-  entity_t ent = {0, {20, 20}, {0, 0}, 'E' | A_BLINK | COLOR_PAIR(2)};
+  entity_t ent = {0, {10, 10}, {0, 0}, 'E'};
 
   gm_addEntity(&ent, &game);
   gm_start(&game);
