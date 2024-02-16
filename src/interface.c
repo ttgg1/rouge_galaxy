@@ -106,6 +106,7 @@ void in_drawPresent(interface_t *in) {
   SDL_DestroyTexture(t);
 }
 
+
 void in_clearScreen(interface_t *in) {
   memset(in->grid, '.', in->w * in->h * sizeof(char));
   SDL_SetRenderDrawColor(in->r, in_bg.r, in_bg.g, in_bg.b, in_bg.a);
