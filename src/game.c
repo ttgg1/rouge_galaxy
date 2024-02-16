@@ -6,7 +6,7 @@ uint8_t num_entities = 0;
 void draw(game_t *g) {
   in_clearScreen(g->in);
   // draw stuff
-  for (int i = 0; i < num_entities; ++i) {
+  for (int i = num_entities - 1; i >= 0; --i) {
     // draw all entities
     in_drawEntity(g->in, g->en_list[i]);
   }
@@ -23,7 +23,6 @@ void handleEvents(game_t *g) {
 
     case SDL_KEYDOWN:
       pl_handleMovement(&g->p, &e);
-      printf("x: %d, y: %d\n", g->p.e.pos.x, g->p.e.pos.y);
       break;
     }
   }
