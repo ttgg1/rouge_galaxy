@@ -22,7 +22,7 @@ typedef struct interface {
   TTF_Font *f;
 } interface_t;
 
-interface_t in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize);
+interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize);
 void in_destroy(interface_t *in);
 
 void in_drawAt(interface_t *in, char c, ivec2_t pos);

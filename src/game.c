@@ -1,6 +1,6 @@
 #include "game.h"
 
-uint8_t num_entities;
+uint8_t num_entities = 0;
 
 void draw(game_t *g) {
   in_clearScreen(g->in);
@@ -30,6 +30,7 @@ void gm_stop(game_t *g) {
   g->isRunning = false;
   free(g->en_list);
   in_destroy(g->in);
+  free(g);
 }
 
 void gm_addEntity(entity_t *e, game_t *g) {
@@ -52,14 +53,14 @@ void gm_addEntity(entity_t *e, game_t *g) {
   ++num_entities;
 }
 
-game_t gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
-  game_t g;
-  interface_t inter;
+game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
+  game_t *g = malloc(sizeof(game_t));
+  interface_t *inter;
 
   // create text interface and store it in game struct
   inter = in_create(grid_w, grid_h, ptsize);
 
-  g.in = &inter;
+  g->in = inter;
 
   // leave entity list empty for now
   num_entities = 0;

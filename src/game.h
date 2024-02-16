@@ -18,6 +18,6 @@ void gm_stop(game_t *g);
 
 void gm_addEntity(entity_t *e, game_t *g);
 
-game_t gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize);
+game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize);
 
 #endif // GAME_H_
