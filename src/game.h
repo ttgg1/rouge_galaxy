@@ -3,6 +3,7 @@
 
 #include "entity.h"
 #include "interface.h"
+#include "player.h"
 #include "utils.h"
 #include <stdbool.h>
 #include <string.h>
@@ -10,7 +11,8 @@
 typedef struct game {
   bool isRunning;
   interface_t *in;
-  entity_t *en_list;
+  entity_t *(*en_list);
+  player_t p;
 } game_t;
 
 void gm_start(game_t *g);

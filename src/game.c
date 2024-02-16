@@ -1,4 +1,5 @@
 #include "game.h"
+#include <stdio.h>
 
 uint8_t num_entities = 0;
 
@@ -7,12 +8,26 @@ void draw(game_t *g) {
   // draw stuff
   for (int i = 0; i < num_entities; ++i) {
     // draw all entities
-    in_drawAt(g->in, g->en_list[i].c, g->en_list[i].pos);
+    in_drawEntity(g->in, g->en_list[i]);
   }
   in_drawPresent(g->in);
 }
-// TODO
-void handleEvents(game_t *g) {}
+
+void handleEvents(game_t *g) {
+  SDL_Event e;
+  while (SDL_PollEvent(&e)) {
+    switch (e.type) {
+    case SDL_QUIT:
+      g->isRunning = false;
+      break;
+
+    case SDL_KEYDOWN:
+      pl_handleMovement(&g->p, &e);
+      printf("x: %d, y: %d\n", g->p.e.pos.x, g->p.e.pos.y);
+      break;
+    }
+  }
+}
 
 void loop(game_t *g) {
   while (g->isRunning) {
@@ -49,7 +64,7 @@ void gm_addEntity(entity_t *e, game_t *g) {
     }
   }
   // add Entity to list
-  g->en_list[num_entities] = *e;
+  g->en_list[num_entities] = e;
   ++num_entities;
 }
 
@@ -61,9 +76,11 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   inter = in_create(grid_w, grid_h, ptsize);
 
   g->in = inter;
+  // Spawns player at 0,0
+  g->p = pl_createPlayer((ivec2_t){0, 0});
 
-  // leave entity list empty for now
-  num_entities = 0;
+  // add Player to Entity list
+  gm_addEntity(&g->p.e, g);
 
   return g;
 }

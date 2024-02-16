@@ -51,17 +51,6 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   res->grid = malloc(mem_size);
   memset(res->grid, '.', mem_size);
 
-  /* for (int i = 0; i < res.w * res.h; ++i) { */
-  /*   printf(" %c ", res.grid[i]); */
-  /*   if (i % res.w == 0) */
-  /*     printf("\n"); */
-  /* } */
-
-  // format grid array so it can be drawn directly
-  /* for(int i = 0; i< ((res.w+1)*res.h)-1;++i){ */
-  /*   if(i % res.w == 0)res.grid[i+1] = '\n'; */
-  /* } */
-
   return res;
 }
 
@@ -87,6 +76,11 @@ void in_drawAt(interface_t *in, char c, ivec2_t pos) {
     in->grid[index] = c;
   }
 }
+
+void in_drawEntity(interface_t *in, entity_t *e) {
+  in_drawAt(in, e->c, e->pos);
+}
+
 void in_drawPresent(interface_t *in) {
   // Draw gird text to Surface
   Uint32 wl = in->grid_cell_w * in->w;
@@ -113,6 +107,7 @@ void in_drawPresent(interface_t *in) {
 }
 
 void in_clearScreen(interface_t *in) {
+  memset(in->grid, '.', in->w * in->h * sizeof(char));
   SDL_SetRenderDrawColor(in->r, in_bg.r, in_bg.g, in_bg.b, in_bg.a);
   SDL_RenderClear(in->r);
 }

@@ -5,15 +5,15 @@
 #include <stdint.h>
 
 typedef struct ivec2 {
-  uint8_t x;
-  uint8_t y;
+  int8_t x;
+  int8_t y;
 } ivec2_t;
 
 typedef struct imat22 {
-  uint8_t a11;
-  uint8_t a12;
-  uint8_t a21;
-  uint8_t a22;
+  int8_t a11;
+  int8_t a12;
+  int8_t a21;
+  int8_t a22;
 } imat22_t;
 
 // common vector operations
