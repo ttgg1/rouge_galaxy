@@ -6,6 +6,8 @@
 #include "vecMath.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <unistd.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>

@@ -5,6 +5,22 @@ uint8_t num_entities = 0;
 
 void draw(game_t *g) {
   in_clearScreen(g->in);
+  //draw stuff
+  list_node_entity_t_t *current = g->ent_list->head;
+  while (current) {
+    if (current->value != NULL) {
+      // draw entity
+    in_drawEntity(g->in,current->value);
+    }
+    
+    current = current->next;
+  }
+  in_drawPresent(g->in);
+}
+
+/*
+void draw(game_t *g) {
+  in_clearScreen(g->in);
   // draw stuff
   for (int i = num_entities - 1; i >= 0; --i) {
     // draw all entities
@@ -12,6 +28,7 @@ void draw(game_t *g) {
   }
   in_drawPresent(g->in);
 }
+*/
 
 void handleEvents(game_t *g) {
   SDL_Event e;
@@ -30,6 +47,7 @@ void handleEvents(game_t *g) {
 
 void loop(game_t *g) {
   while (g->isRunning) {
+    //printf("%d \n", g->isRunning);  
     handleEvents(g);
     draw(g);
   }
@@ -44,9 +62,15 @@ void gm_stop(game_t *g) {
   g->isRunning = false;
   free(g->en_list);
   in_destroy(g->in);
+  li_destroy(g->ent_list);
   free(g);
 }
 
+void gm_addEntity(entity_t *e, game_t *g) {
+  li_push(g->ent_list, e);
+}
+
+/*
 void gm_addEntity(entity_t *e, game_t *g) {
   // allocate memory if not created
   if (num_entities == 0) {
@@ -66,6 +90,7 @@ void gm_addEntity(entity_t *e, game_t *g) {
   g->en_list[num_entities] = e;
   ++num_entities;
 }
+*/
 
 game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   game_t *g = malloc(sizeof(game_t));
@@ -76,10 +101,14 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
 
   g->in = inter;
   // Spawns player at 0,0
-  g->p = pl_createPlayer((ivec2_t){0, 0});
+  g->p = pl_create_player((ivec2_t){0, 0});
+
+  // init entity linked list
+  g->ent_list = li_empty_list();
+
 
   // add Player to Entity list
-  gm_addEntity(&g->p.e, g);
+  gm_addEntity(g->p->e, g);
 
   return g;
 }

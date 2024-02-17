@@ -21,11 +21,26 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   }
 
   // Open Font
-  res->f = TTF_OpenFont("../../assets/FiraMono.ttf", (int)ptsize);
-  if (res->f == NULL) {
-    debug_print("SDL2_ttf Failed to intitialize the Font: %s \n",
-                SDL_GetError());
-  }
+  char cwd[PATH_MAX];
+  if (getcwd(cwd, sizeof(cwd)) != NULL) {
+       strcat(cwd, "\\..\\assets\\FiraMono.ttf");
+       for (int i = 0; i < PATH_MAX; i++) {
+          if (cwd[i] == 0){
+            char path[i];
+            strcpy(path, cwd); 
+            res->f = TTF_OpenFont(path, (int)ptsize); 
+            if (res->f == NULL) {
+              debug_print("SDL2_ttf Failed to intitialize the Font: %s \n",
+                          SDL_GetError());
+            }
+            break;
+          }
+       }
+   } else {
+       debug_print("Failed to open font file! \n");
+       exit(1);
+   }
+  
 
   // get grid_cell_w and h
   if (TTF_SizeUTF8(res->f, " ", (int *)&res->grid_cell_w,
@@ -69,7 +84,10 @@ void in_destroy(interface_t *in) {
 
 void in_drawAt(interface_t *in, char c, ivec2_t pos) {
   int index = pos.x + pos.y * in->w;
-
+  if (index >= in->h * in->w) {
+    debug_print("Tried to write to out-of-bounds !\n");
+    return;
+  }
   if (in->grid == NULL) {
     debug_print("Tried to write to an uninitialized grid array !\n");
   } else {

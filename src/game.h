@@ -8,11 +8,17 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define LIST_NODE_TYPE entity_t
+#undef LIST_H_
+#include "list.h"
+
+
 typedef struct game {
   bool isRunning;
   interface_t *in;
   entity_t *(*en_list);
-  player_t p;
+  linked_list_entity_t_t *ent_list;
+  player_t *p;
 } game_t;
 
 void gm_start(game_t *g);

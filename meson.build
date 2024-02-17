@@ -12,6 +12,7 @@ sdl2_main_dep = dependency('sdl2main', required: true)
 
 inc = include_directories('src')
 add_project_arguments('-pedantic', language:'c')
+add_project_arguments('-g', language:'c')
 
 subdir('src')
 subdir('tests')
