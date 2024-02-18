@@ -18,6 +18,8 @@
               ##__VA_ARGS__);                                                  \
   } while (0)
 
-char *cwdJoinPath(char *path);
+void cwdJoinPath(char *path, char *dest);
+
+int cwdPathLenght(char *path);
 
 #endif // UTILS_H_

@@ -22,7 +22,12 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
 
   // Open Font
 
-  res->f = TTF_OpenFont(cwdJoinPath("\\..\\assets\\FiraMono.ttf"), (int)ptsize);
+  char *relPath = "\\..\\assets\\FiraMono.ttf";
+  int pathLenght = cwdPathLenght(relPath);
+  char path[pathLenght];
+  cwdJoinPath(relPath, path);
+  printf("PATH: %s \n", path);
+  res->f = TTF_OpenFont(path, (int)ptsize);
   if (res->f == NULL)
   {
       debug_print("SDL2_ttf Failed to intitialize the Font: %s \n",
