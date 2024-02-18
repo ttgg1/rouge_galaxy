@@ -18,6 +18,6 @@
               ##__VA_ARGS__);                                                  \
   } while (0)
 
-char *cwd_join_path(char *path);
+char *cwdJoinPath(char *path);
 
 #endif // UTILS_H_

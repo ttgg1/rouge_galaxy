@@ -19,19 +19,19 @@ typedef struct entity_list
 } entity_list_t;
 
 
-entity_list_t *li_empty_list();
+entity_list_t *li_emptyList();
 entity_list_t *li_copy(entity_list_t *list);
 
 void li_destroy(entity_list_t *list);
-void li_destroy_node(entity_node_t *node);
+void li_destroyNode(entity_node_t *node);
 
 void li_push(entity_list_t *list, entity_t *value);
 void li_append(entity_list_t *list, entity_t *value);
-void li_set_at_index(entity_list_t *list, int index, entity_t *value);
+void li_setAtIndex(entity_list_t *list, int index, entity_t *value);
 
 entity_t *li_pop(entity_list_t *list);
-entity_t *li_get_at_index(entity_list_t *list, int index);
-entity_node_t *li_get_node_at_index(entity_list_t *list, int index);
-void li_remove_index(entity_list_t *list, int index);
+entity_t *li_getAtIndex(entity_list_t *list, int index);
+entity_node_t *li_getNodeAtIndex(entity_list_t *list, int index);
+void li_removeIndex(entity_list_t *list, int index);
 
 #endif  // ENTITY_LIST_H_

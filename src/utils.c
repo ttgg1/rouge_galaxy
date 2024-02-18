@@ -1,6 +1,6 @@
 #include "utils.h"
 
-char *cwd_join_path(char *path){
+char *cwdJoinPath(char *path){
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL)
     {

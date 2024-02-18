@@ -9,8 +9,8 @@ typedef struct player {
   entity_t *e;
 } player_t;
 
-player_t *pl_create_player(ivec2_t pos);
-void pl_destroy_player(player_t *);
+player_t *pl_createPlayer(ivec2_t pos);
+void pl_destroyPlayer(player_t *);
 
 
 // call after case SDL_KEYDOWN

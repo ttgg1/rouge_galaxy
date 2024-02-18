@@ -8,7 +8,7 @@
 #include "interface.h"
 #include "player.h"
 #include "utils.h"
-#include "entity_list.h"
+#include "entityList.h"
 
 
 typedef struct game {

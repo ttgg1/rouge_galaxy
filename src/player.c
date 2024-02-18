@@ -1,6 +1,6 @@
 #include "player.h"
 
-player_t *pl_create_player(ivec2_t pos) {
+player_t *pl_createPlayer(ivec2_t pos) {
   player_t *res;
   res = (player_t *) malloc(sizeof(player_t));
   res->e = en_create(0, pos, 'P');
@@ -8,7 +8,7 @@ player_t *pl_create_player(ivec2_t pos) {
   return res;
 }
 
-void pl_destroy_player(player_t *p) {
+void pl_destroyPlayer(player_t *p) {
   // cleanup player
 
   // free player struct

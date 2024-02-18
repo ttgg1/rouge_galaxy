@@ -12,7 +12,7 @@ int n_offsets = 4;
 
 
 
-void wave_function_collapse(wfcdata_t *data, int start_y, int start_x) {
+void waveFunctionCollapse(wfcdata_t *data, int start_y, int start_x) {
 
     if (start_y < 0 || start_y >= data->map_height || start_x < 0 || start_x >= data->map_width) {
         // return if starting tile is out-of-bounds
@@ -70,7 +70,7 @@ void wave_function_collapse(wfcdata_t *data, int start_y, int start_x) {
     // continue propagating changes to updated neighbouring tiles
     for (int i = 0; i < n_offsets; i++) {
         if (changes[i]) {
-            wave_function_collapse(data, pos_y + OFFSETS[i][0], pos_x + OFFSETS[i][1]);
+            waveFunctionCollapse(data, pos_y + OFFSETS[i][0], pos_x + OFFSETS[i][1]);
         }
     }
 }

@@ -1,9 +1,9 @@
 #include "utils.h"
 #include "SDL_error.h"
 
-#include "entity_list.h"
+#include "entityList.h"
 
-entity_list_t *li_empty_list() {
+entity_list_t *li_emptyList() {
     entity_list_t *list;
     list = (entity_list_t *) malloc(sizeof(entity_list_t));
     if (list == NULL) {
@@ -16,7 +16,7 @@ entity_list_t *li_empty_list() {
 
 entity_list_t *li_copy(entity_list_t *list){
     if (list->size == 0) {
-        return li_empty_list();
+        return li_emptyList();
     }
     entity_list_t *cpy;
     list = (entity_list_t *) malloc(sizeof(entity_list_t));
@@ -55,7 +55,7 @@ entity_list_t *li_copy(entity_list_t *list){
     return cpy;
 }
 
-void li_destroy_node(entity_node_t *node) {
+void li_destroyNode(entity_node_t *node) {
 if (node->value != NULL) {
         free(node->value);
     }
@@ -67,7 +67,7 @@ void li_destroy(entity_list_t *list) {
     entity_node_t *temp;
     while (current != NULL) {
         temp = current->next;
-        li_destroy_node(current);
+        li_destroyNode(current);
         current = temp;
     }
     free(list);
@@ -118,13 +118,13 @@ entity_t *li_pop(entity_list_t *list){
     }
     entity_t *value = list->head->value;
     entity_node_t *temp = list->head->next;
-    li_destroy_node(list->head);
+    li_destroyNode(list->head);
     list->head = temp;
     list->size--;
     return value;
 }
 
-entity_t *li_get_at_index(entity_list_t *list, int index) {
+entity_t *li_getAtIndex(entity_list_t *list, int index) {
     if (index > list->size) {
         return;
     }
@@ -139,7 +139,7 @@ entity_t *li_get_at_index(entity_list_t *list, int index) {
     return;
 }
 
-entity_node_t *li_get_node_at_index(entity_list_t *list, int index) {
+entity_node_t *li_getNodeAtIndex(entity_list_t *list, int index) {
     if (index > list->size) {
         return;
     }
@@ -153,7 +153,7 @@ entity_node_t *li_get_node_at_index(entity_list_t *list, int index) {
     }
 }
 
-void li_set_at_index(entity_list_t *list, int index, entity_t *value) {
+void li_setAtIndex(entity_list_t *list, int index, entity_t *value) {
     if (index > list->size) {
         return;
     }
@@ -167,7 +167,7 @@ void li_set_at_index(entity_list_t *list, int index, entity_t *value) {
     }
 }
 
-void li_remove_index(entity_list_t *list, int index){
+void li_removeIndex(entity_list_t *list, int index){
     if (index > list->size) {
         return;
     }
@@ -180,7 +180,7 @@ void li_remove_index(entity_list_t *list, int index){
     }
     if (index == 0) {
         last->next = current->next;
-        li_destroy_node(current);
+        li_destroyNode(current);
     }
 }
 

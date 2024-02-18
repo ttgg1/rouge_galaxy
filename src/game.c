@@ -27,7 +27,7 @@ void handleEvents(game_t *g) {
       break;
 
     case SDL_KEYDOWN:
-      pl_handleMovement(&g->p, &e);
+      pl_handleMovement(g->p, &e);
       break;
     }
   }
@@ -47,7 +47,7 @@ void gm_start(game_t *g) {
 
 void gm_stop(game_t *g) {
   g->isRunning = false;
-  pl_destroy_player(g->p);
+  pl_destroyPlayer(g->p);
   in_destroy(g->in);
   li_destroy(g->en_list);
   free(g);
@@ -66,10 +66,10 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
 
   g->in = inter;
   // Spawns player at 0,0
-  g->p = pl_create_player((ivec2_t){0, 0});
+  g->p = pl_createPlayer((ivec2_t){0, 0});
 
   // init entity linked list
-  g->en_list = li_empty_list();
+  g->en_list = li_emptyList();
 
 
   // add Player to Entity list

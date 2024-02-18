@@ -12,6 +12,6 @@ typedef struct wfcdata {
 } wfcdata_t;
 
 
-void wave_function_collapse(wfcdata_t *data, int startY, int startX);
+void waveFunctionCollapse(wfcdata_t *data, int startY, int startX);
 
 #endif // WFC_H_
