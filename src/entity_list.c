@@ -1,15 +1,11 @@
-#ifndef LIST_NODE_TYPE
-#define LIST_NODE_TYPE entity_t
-#endif // LIST_NODE_TYPE
-
 #include "utils.h"
 #include "SDL_error.h"
 
-#include "list.h"
+#include "entity_list.h"
 
-LINKED_LIST_T_ *li_empty_list() {
-    LINKED_LIST_T_ *list;
-    list = (LINKED_LIST_T_ *) malloc(sizeof(LINKED_LIST_T_));
+entity_list_t *li_empty_list() {
+    entity_list_t *list;
+    list = (entity_list_t *) malloc(sizeof(entity_list_t));
     if (list == NULL) {
         debug_print("Failed alloc memory for linked_list ! \n");
     }
@@ -18,21 +14,21 @@ LINKED_LIST_T_ *li_empty_list() {
     return list;
 }
 
-LINKED_LIST_T_ *li_copy(LINKED_LIST_T_ *list){
+entity_list_t *li_copy(entity_list_t *list){
     if (list->size == 0) {
         return li_empty_list();
     }
-    LINKED_LIST_T_ *cpy;
-    list = (LINKED_LIST_T_ *) malloc(sizeof(LINKED_LIST_T_));
+    entity_list_t *cpy;
+    list = (entity_list_t *) malloc(sizeof(entity_list_t));
     if (list == NULL) {
         debug_print("Failed alloc memory for linked_list ! \n");
         return;
     }
 
-    LIST_NODE_T_ *current = list->head;
-    LIST_NODE_T_ *node;
-    LIST_NODE_T_ *last;
-    node = (LIST_NODE_T_ *) malloc(sizeof(LIST_NODE_T_));
+    entity_node_t *current = list->head;
+    entity_node_t *node;
+    entity_node_t *last;
+    node = (entity_node_t *) malloc(sizeof(entity_node_t));
     if (node == NULL) {
         debug_print("Failed alloc memory for list_node ! \n");
         return;
@@ -45,7 +41,7 @@ LINKED_LIST_T_ *li_copy(LINKED_LIST_T_ *list){
     
     while (current != NULL) {
         last = node;
-        node = (LIST_NODE_T_ *) malloc(sizeof(LIST_NODE_T_));
+        node = (entity_node_t *) malloc(sizeof(entity_node_t));
         if (node == NULL) {
             debug_print("Failed alloc memory for list_node ! \n");
             return;
@@ -59,16 +55,16 @@ LINKED_LIST_T_ *li_copy(LINKED_LIST_T_ *list){
     return cpy;
 }
 
-void li_destroy_node(LIST_NODE_T_ *node) {
+void li_destroy_node(entity_node_t *node) {
 if (node->value != NULL) {
         free(node->value);
     }
     free(node);
 }
 
-void li_destroy(LINKED_LIST_T_ *list) {
-    LIST_NODE_T_ *current = list->head;
-    LIST_NODE_T_ *temp;
+void li_destroy(entity_list_t *list) {
+    entity_node_t *current = list->head;
+    entity_node_t *temp;
     while (current != NULL) {
         temp = current->next;
         li_destroy_node(current);
@@ -77,9 +73,9 @@ void li_destroy(LINKED_LIST_T_ *list) {
     free(list);
 }
 
-void li_append(LINKED_LIST_T_ *list, LIST_NODE_TYPE *value) {
-    LIST_NODE_T_ *node;
-    node = (LIST_NODE_T_ *) malloc(sizeof(LIST_NODE_T_));
+void li_append(entity_list_t *list, entity_t *value) {
+    entity_node_t *node;
+    node = (entity_node_t *) malloc(sizeof(entity_node_t));
     if (node == NULL) {
         debug_print("Failed alloc memory for list_node ! \n");
         return;
@@ -93,7 +89,7 @@ void li_append(LINKED_LIST_T_ *list, LIST_NODE_TYPE *value) {
         return;
     }
 
-    LIST_NODE_T_ *current = list->head;
+    entity_node_t *current = list->head;
     while (current->next != NULL) {
         
         current = current->next;
@@ -102,9 +98,9 @@ void li_append(LINKED_LIST_T_ *list, LIST_NODE_TYPE *value) {
     list->size++;
 }
 
-void li_push(LINKED_LIST_T_ *list, LIST_NODE_TYPE *value){
-    LIST_NODE_T_ *node;
-    node = (LIST_NODE_T_ *) malloc(sizeof(LIST_NODE_T_));
+void li_push(entity_list_t *list, entity_t *value){
+    entity_node_t *node;
+    node = (entity_node_t *) malloc(sizeof(entity_node_t));
     if (node == NULL) {
         debug_print("Failed alloc memory for list_node ! \n");
         return;
@@ -116,23 +112,23 @@ void li_push(LINKED_LIST_T_ *list, LIST_NODE_TYPE *value){
 }
 
 
-LIST_NODE_TYPE *li_pop(LINKED_LIST_T_ *list){
+entity_t *li_pop(entity_list_t *list){
     if (list->head == NULL) {
         return;
     }
-    LIST_NODE_TYPE *value = list->head->value;
-    LIST_NODE_T_ *temp = list->head->next;
+    entity_t *value = list->head->value;
+    entity_node_t *temp = list->head->next;
     li_destroy_node(list->head);
     list->head = temp;
     list->size--;
     return value;
 }
 
-LIST_NODE_TYPE *li_get_at_index(LINKED_LIST_T_ *list, int index) {
+entity_t *li_get_at_index(entity_list_t *list, int index) {
     if (index > list->size) {
         return;
     }
-    LIST_NODE_T_ *current = list->head;
+    entity_node_t *current = list->head;
     while (current->next != NULL && index > 0) {
         current = current->next;
         index--;
@@ -143,11 +139,25 @@ LIST_NODE_TYPE *li_get_at_index(LINKED_LIST_T_ *list, int index) {
     return;
 }
 
-void li_set_at_index(LINKED_LIST_T_ *list, int index, LIST_NODE_TYPE *value) {
+entity_node_t *li_get_node_at_index(entity_list_t *list, int index) {
     if (index > list->size) {
         return;
     }
-    LIST_NODE_T_ *current = list->head;
+    entity_node_t *current = list->head;
+    while (current->next != NULL && index > 0) {
+        current = current->next;
+        index--;
+    }
+    if (index == 0) {
+        return current;
+    }
+}
+
+void li_set_at_index(entity_list_t *list, int index, entity_t *value) {
+    if (index > list->size) {
+        return;
+    }
+    entity_node_t *current = list->head;
     while (current->next != NULL && index > 0) {
         current = current->next;
         index--;
@@ -157,12 +167,12 @@ void li_set_at_index(LINKED_LIST_T_ *list, int index, LIST_NODE_TYPE *value) {
     }
 }
 
-void li_remove_index(LINKED_LIST_T_ *list, int index){
+void li_remove_index(entity_list_t *list, int index){
     if (index > list->size) {
         return;
     }
-    LIST_NODE_T_ *current = list->head;
-    LIST_NODE_T_ *last;
+    entity_node_t *current = list->head;
+    entity_node_t *last;
     while (current->next != NULL && index > 0) {
         last = current;
         current = current->next;
