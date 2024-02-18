@@ -1,23 +1,20 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include <stdbool.h>
+#include <string.h>
+
 #include "entity.h"
 #include "interface.h"
 #include "player.h"
 #include "utils.h"
-#include <stdbool.h>
-#include <string.h>
-
-#define LIST_NODE_TYPE entity_t
-#undef LIST_H_
-#include "list.h"
+#include "entity_list.h"
 
 
 typedef struct game {
   bool isRunning;
   interface_t *in;
-  entity_t *(*en_list);
-  linked_list_entity_t_t *ent_list;
+  entity_list_t *en_list;
   player_t *p;
 } game_t;
 

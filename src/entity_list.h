@@ -1,66 +1,37 @@
-#ifndef LIST_H_
-#define LIST_H_
+#ifndef ENTITY_LIST_H_
+#define ENTITY_LIST_H_
 
 #include <stdlib.h>
 #include <stdint.h>
 #include "entity.h"
 
-// define LIST_NODE_TYPE before including 
-typedef struct list_node_entity_t
+
+typedef struct entity_node
 {
   entity_t *value;
-  struct list_node_entity_t *next;
-} list_node_entity_t_t;
+  struct entity_node *next;
+} entity_node_t;
 
-typedef struct list_node_int
+typedef struct entity_list
 {
-  int *value;
-  struct list_node_int *next;
-} list_node_int_t;
-
-
-typedef struct linked_list_entity_t
-{
-    list_node_entity_t_t *head;
+    entity_node_t *head;
     int size;
-} linked_list_entity_t_t;
-
-typedef struct linked_list_int
-{
-    list_node_int_t *head;
-    int size;
-} linked_list_int_t;
-#endif // LIST_H_
-
-#ifdef LIST_NODE_TYPE
-
-#define TOKENPASTE2(x,y) x ## y
-#define TOKENPASTE3(x,y,z) x ## y ## z
-
-#define LIST_NODE(T) TOKENPASTE2(list_node_, T) 
-#define LIST_NODE_T(T) TOKENPASTE3(list_node_, T, _t)
-
-#define LIST_NODE_ LIST_NODE(LIST_NODE_TYPE)
-#define LIST_NODE_T_ LIST_NODE_T(LIST_NODE_TYPE)
+} entity_list_t;
 
 
-#define LINKED_LIST(T) TOKENPASTE2(linked_list_, T) 
-#define LINKED_LIST_T(T) TOKENPASTE3(linked_list_, T, _t)
+entity_list_t *li_empty_list();
+entity_list_t *li_copy(entity_list_t *list);
 
-#define LINKED_LIST_ LINKED_LIST(LIST_NODE_TYPE)
-#define LINKED_LIST_T_ LINKED_LIST_T(LIST_NODE_TYPE)
+void li_destroy(entity_list_t *list);
+void li_destroy_node(entity_node_t *node);
 
+void li_push(entity_list_t *list, entity_t *value);
+void li_append(entity_list_t *list, entity_t *value);
+void li_set_at_index(entity_list_t *list, int index, entity_t *value);
 
-LINKED_LIST_T_ *li_empty_list();
-LINKED_LIST_T_ *li_copy(LINKED_LIST_T_ *list);
-void li_destroy(LINKED_LIST_T_ *list);
-void li_append(LINKED_LIST_T_ *list, LIST_NODE_TYPE *value);
-void li_push(LINKED_LIST_T_ *list, LIST_NODE_TYPE *value);
-LIST_NODE_TYPE *li_pop(LINKED_LIST_T_ *list);
-LIST_NODE_TYPE *li_get_at_index(LINKED_LIST_T_ *list, int index);
-void li_set_at_index(LINKED_LIST_T_ *list, int index, LIST_NODE_TYPE *value);
-void li_remove_index(LINKED_LIST_T_ *list, int index);
-void li_destroy_node(LIST_NODE_T_ *node);
+entity_t *li_pop(entity_list_t *list);
+entity_t *li_get_at_index(entity_list_t *list, int index);
+entity_node_t *li_get_node_at_index(entity_list_t *list, int index);
+void li_remove_index(entity_list_t *list, int index);
 
-#endif // LIST_NODE_TYPE
-
+#endif  // ENTITY_LIST_H_

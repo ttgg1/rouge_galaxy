@@ -6,7 +6,7 @@ uint8_t num_entities = 0;
 void draw(game_t *g) {
   in_clearScreen(g->in);
   //draw stuff
-  list_node_entity_t_t *current = g->ent_list->head;
+  entity_node_t *current = g->en_list->head;
   while (current) {
     if (current->value != NULL) {
       // draw entity
@@ -17,18 +17,6 @@ void draw(game_t *g) {
   }
   in_drawPresent(g->in);
 }
-
-/*
-void draw(game_t *g) {
-  in_clearScreen(g->in);
-  // draw stuff
-  for (int i = num_entities - 1; i >= 0; --i) {
-    // draw all entities
-    in_drawEntity(g->in, g->en_list[i]);
-  }
-  in_drawPresent(g->in);
-}
-*/
 
 void handleEvents(game_t *g) {
   SDL_Event e;
@@ -47,7 +35,6 @@ void handleEvents(game_t *g) {
 
 void loop(game_t *g) {
   while (g->isRunning) {
-    //printf("%d \n", g->isRunning);  
     handleEvents(g);
     draw(g);
   }
@@ -60,37 +47,15 @@ void gm_start(game_t *g) {
 
 void gm_stop(game_t *g) {
   g->isRunning = false;
-  free(g->en_list);
+  pl_destroy_player(g->p);
   in_destroy(g->in);
-  li_destroy(g->ent_list);
+  li_destroy(g->en_list);
   free(g);
 }
 
 void gm_addEntity(entity_t *e, game_t *g) {
-  li_push(g->ent_list, e);
+  li_push(g->en_list, e);
 }
-
-/*
-void gm_addEntity(entity_t *e, game_t *g) {
-  // allocate memory if not created
-  if (num_entities == 0) {
-    g->en_list = malloc(sizeof(entity_t));
-  } else {
-    // if there is already an entity list allocated -> realloc
-    entity_t *en_temp_p =
-        realloc(g->en_list, (num_entities + 1) * sizeof(entity_t));
-    // check if realloc worked
-    if (en_temp_p == NULL) {
-      debug_print("Enity-List failed to reallocate !!\n");
-    } else {
-      g->en_list = en_temp_p;
-    }
-  }
-  // add Entity to list
-  g->en_list[num_entities] = e;
-  ++num_entities;
-}
-*/
 
 game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   game_t *g = malloc(sizeof(game_t));
@@ -104,7 +69,7 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   g->p = pl_create_player((ivec2_t){0, 0});
 
   // init entity linked list
-  g->ent_list = li_empty_list();
+  g->en_list = li_empty_list();
 
 
   // add Player to Entity list

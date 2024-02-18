@@ -9,6 +9,9 @@ player_t *pl_create_player(ivec2_t pos) {
 }
 
 void pl_destroy_player(player_t *p) {
+  // cleanup player
+
+  // free player struct
   free(p);
 }
 
