@@ -1,37 +1,113 @@
 #include "interface.h"
-#include "vecMath.h"
-#include <ncurses.h>
+#include "SDL_error.h"
+#include "utils.h"
 
-interface_t in_create(uint8_t cols, uint8_t lines) {
-  interface_t res;
+SDL_Color in_bg = {20, 20, 20, 255};
+SDL_Color in_fg = {200, 200, 200, 255};
 
-  res.w = cols;
-  res.h = lines;
+interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
+  interface_t *res = malloc(sizeof(interface_t));
 
-  res.pixels = malloc(res.w * res.h * sizeof(char));
+  res->w = grid_w;
+  res->h = grid_h;
 
-  // intit ncurses
-  initscr();
-  noecho();
-  keypad(stdscr, TRUE);
+  // init SDL2 & SDL2_ttf
 
-  // create ncurses Window
-  res.win = newwin(res.w, res.h, 0, 0);
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    debug_print("SDL2 Failed to intitialize Video: %s \n", SDL_GetError());
+  }
+  if (TTF_Init() < 0) {
+    debug_print("SDL2_ttf Failed to intitialize: %s \n", SDL_GetError());
+  }
+
+  // Open Font
+  res->f = TTF_OpenFont("../../assets/FiraMono.ttf", (int)ptsize);
+  if (res->f == NULL) {
+    debug_print("SDL2_ttf Failed to intitialize the Font: %s \n",
+                SDL_GetError());
+  }
+
+  // get grid_cell_w and h
+  if (TTF_SizeUTF8(res->f, " ", (int *)&res->grid_cell_w,
+                   (int *)&res->grid_cell_h) < 0) {
+    debug_print("SDL2_ttf Failed to fetch the Fontsize: %s \n", SDL_GetError());
+  }
+
+  // create SDL window and renderer
+  int win_w = res->w * res->grid_cell_w + 1;
+  int win_h = res->h * res->grid_cell_h + 1;
+
+  if (SDL_CreateWindowAndRenderer(win_w, win_h, SDL_WINDOW_OPENGL, &res->win,
+                                  &res->r) < 0) {
+    debug_print("SDL2 Failed to intitialize Window and/or Renderer: %s \n",
+                SDL_GetError());
+  }
+
+  SDL_SetWindowTitle(res->win, "Rouge Galaxy");
+
+  // init Grid
+  size_t mem_size = res->w * res->h * sizeof(char);
+
+  res->grid = malloc(mem_size);
+  memset(res->grid, '.', mem_size);
 
   return res;
 }
 
-void in_destroy(interface_t *in) { free(in->pixels); }
+void in_destroy(interface_t *in) {
+  free(in->grid);
 
-void in_drawAt(interface_t *in, chtype c, ivec2_t pos) {
-  // save current curser pos
-  ivec2_t old_pos;
-  getyx(in->win, old_pos.y, old_pos.x);
+  TTF_CloseFont(in->f);
+  TTF_Quit();
 
-  // move cursor and draw char
-  mvwaddch(in->win, pos.y, pos.x, c);
+  SDL_DestroyRenderer(in->r);
+  SDL_DestroyWindow(in->win);
+  SDL_Quit();
 
-  // move back to orgiginal position
-  wmove(in->win, old_pos.y, old_pos.x);
+  free(in);
 }
-void in_drawRefresh(interface_t *in) { wrefresh(in->win); }
+
+void in_drawAt(interface_t *in, char c, ivec2_t pos) {
+  int index = pos.x + pos.y * in->w;
+
+  if (in->grid == NULL) {
+    debug_print("Tried to write to an uninitialized grid array !\n");
+  } else {
+    in->grid[index] = c;
+  }
+}
+
+void in_drawEntity(interface_t *in, entity_t *e) {
+  in_drawAt(in, e->c, e->pos);
+}
+
+void in_drawPresent(interface_t *in) {
+  // Draw gird text to Surface
+  Uint32 wl = in->grid_cell_w * in->w;
+  SDL_Surface *s =
+      TTF_RenderText_Shaded_Wrapped(in->f, in->grid, in_fg, in_bg, wl);
+
+  if (s == NULL) {
+    debug_print("Failed to render text to SDL_Surface: %s \n", SDL_GetError());
+  }
+
+  // Create Texture & render
+  SDL_Texture *t = SDL_CreateTextureFromSurface(in->r, s);
+
+  if (t == NULL) {
+    debug_print("Failed to create SDL Texture form surface %s \n",
+                SDL_GetError());
+  }
+
+  SDL_RenderCopy(in->r, t, NULL, NULL);
+  SDL_RenderPresent(in->r);
+
+  SDL_FreeSurface(s);
+  SDL_DestroyTexture(t);
+}
+
+void in_clearScreen(interface_t *in) {
+  memset(in->grid, '.', in->w * in->h * sizeof(char));
+  SDL_SetRenderDrawColor(in->r, in_bg.r, in_bg.g, in_bg.b, in_bg.a);
+  SDL_RenderClear(in->r);
+}
