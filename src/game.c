@@ -1,5 +1,5 @@
 #include "game.h"
-#include <stdio.h>
+
 
 uint8_t num_entities = 0;
 
