@@ -6,15 +6,8 @@ uint8_t num_entities = 0;
 void draw(game_t *g) {
   in_clearScreen(g->in);
   //draw stuff
-  entity_node_t *current = g->en_list->head;
-  while (current) {
-    if (current->value != NULL) {
-      // draw entity
-    in_drawEntity(g->in,current->value);
-    }
-    
-    current = current->next;
-  }
+  gm_updateGrid(g);
+
   in_drawPresent(g->in);
 }
 
@@ -57,6 +50,9 @@ void gm_addEntity(entity_t *e, game_t *g) {
   li_push(g->en_list, e);
 }
 
+/*
+  odd grid_w and grid_h for centered player
+*/
 game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   game_t *g = malloc(sizeof(game_t));
   interface_t *inter;
@@ -76,4 +72,38 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   gm_addEntity(g->p->e, g);
 
   return g;
+}
+
+bool gm_entityOnGrid(entity_t *e, game_t *g) {
+  return e->pos.x >= g->p->e->pos.x - g->in->w / 2 
+      && e->pos.x <= g->p->e->pos.x + g->in->w / 2
+      && e->pos.y >= g->p->e->pos.y - g->in->h / 2 
+      && e->pos.y <= g->p->e->pos.y + g->in->h / 2;
+}
+
+
+void gm_updateGrid(game_t *g) {
+  // clear grid
+  memset(g->in->grid, '.', g->in->w * g->in->h * sizeof(char));
+
+  int offsetY, offsetX;
+  offsetY = g->in->h / 2;
+  offsetX = g->in->w / 2;
+
+  // handle map 
+
+  // TODO
+
+  // handle entities
+
+  entity_node_t *current = g->en_list->head;
+  while (current != NULL) {
+    if (current->value != NULL && gm_entityOnGrid(current->value, g)) {
+      in_drawAt(g->in, current->value->c, (ivec2_t){current->value->pos.x - g->p->e->pos.x + offsetX, current->value->pos.y - g->p->e->pos.y + offsetY});
+    }
+    current = current->next;
+  }
+
+  // set EoL
+  g->in->grid[g->in->w * g->in->h] = '\0';
 }

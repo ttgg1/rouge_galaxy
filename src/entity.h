@@ -11,7 +11,7 @@ typedef struct entity {
   char c;
 } entity_t;
 
-void en_move(entity_t *e, int8_t x_step, int8_t y_step);
+void en_move(entity_t *e, int16_t x_step, int16_t y_step);
 
 entity_t *en_create(uint8_t id, ivec2_t pos, char c);
 

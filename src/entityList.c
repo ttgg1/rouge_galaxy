@@ -118,7 +118,7 @@ entity_t *li_pop(entity_list_t *list){
     }
     entity_t *value = list->head->value;
     entity_node_t *temp = list->head->next;
-    li_destroyNode(list->head);
+    //li_destroyNode(list->head);
     list->head = temp;
     list->size--;
     return value;
@@ -180,7 +180,7 @@ void li_removeIndex(entity_list_t *list, int index){
     }
     if (index == 0) {
         last->next = current->next;
-        li_destroyNode(current);
+        //li_destroyNode(current);
     }
 }
 
