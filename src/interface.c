@@ -95,6 +95,7 @@ void in_destroy(interface_t *in) {
 }
 
 void in_drawAt(interface_t *in, char c, ivec2_t pos) {
+#ifndef COLOR
   int index = pos.x + pos.y * in->w;
   if (index < 0 || index >= in->h * in->w) {
     debug_print("Tried to write to out-of-bounds !\n");
@@ -105,11 +106,15 @@ void in_drawAt(interface_t *in, char c, ivec2_t pos) {
   } else {
     in->grid[index] = c;
   }
+#else
+  in_drawAtColored(in, (uint32_t)c, in_fg, pos);
+#endif
 }
 
 void in_drawAtColored(interface_t *in, uint32_t c, SDL_Color color,
                       ivec2_t pos) {
-  int index = GET_GRID_INDEX(pos.x, pos.y, in->grid_cell_w);
+#ifdef COLOR
+  int index = GET_GRID_INDEX(pos.x, pos.y, in->w);
 
   if (in->grid == NULL || in->colormap == NULL) {
     debug_print(
@@ -118,6 +123,9 @@ void in_drawAtColored(interface_t *in, uint32_t c, SDL_Color color,
     in->grid[index] = c;
     in->colormap[index] = color;
   }
+#else
+  in_drawAt(in, (char)c, pos);
+#endif
 }
 
 void in_drawEntity(interface_t *in, entity_t *e) {
@@ -155,8 +163,7 @@ void in_drawPresent(interface_t *in) {
 #else
   // TODO: maybe use one big texture that is filled with surfaces
   //  draw colored in 32 bit encoding (much slower)
-  SDL_Rect pos_r = {
-      .x = 0, .y = 0, .w = in->grid_cell_w * 2, .h = in->grid_cell_h};
+  SDL_Rect pos_r = {.x = 0, .y = 0, .w = in->grid_cell_w, .h = in->grid_cell_h};
   for (int i = 0; i < in->h * in->w; ++i) {
     SDL_Surface *s =
         TTF_RenderGlyph32_Shaded(in->f, in->grid[i], in->colormap[i], in_bg);
@@ -169,7 +176,7 @@ void in_drawPresent(interface_t *in) {
 
     // increase position
     pos_r.x += in->grid_cell_w * 2;
-    if (pos_r.x >= in->w * in->grid_cell_w * 2) {
+    if (pos_r.x > in->w * in->grid_cell_w * 2) {
       pos_r.x = 0;
       pos_r.y += in->grid_cell_h;
     }

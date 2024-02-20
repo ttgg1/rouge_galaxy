@@ -2,7 +2,7 @@
 #define INTERFACE_H_
 
 #define COLOR 1
-#define GET_GRID_INDEX(x, y, w) x + y *w
+#define GET_GRID_INDEX(x, y, w) (x + (y * w))
 
 #include "entity.h"
 #include "utils.h"
