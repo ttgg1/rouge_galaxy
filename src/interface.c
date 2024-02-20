@@ -176,7 +176,7 @@ void in_drawPresent(interface_t *in) {
 
     // increase position
     pos_r.x += in->grid_cell_w * 2;
-    if (pos_r.x > in->w * in->grid_cell_w * 2) {
+    if (pos_r.x >= in->w * in->grid_cell_w * 2 - 1) {
       pos_r.x = 0;
       pos_r.y += in->grid_cell_h;
     }
