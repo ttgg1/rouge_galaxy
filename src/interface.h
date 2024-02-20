@@ -44,6 +44,8 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize);
 void in_destroy(interface_t *in);
 
 void in_drawAt(interface_t *in, char c, ivec2_t pos);
+void in_drawAtColored(interface_t *in, uint32_t c, SDL_Color color,
+                      ivec2_t pos);
 void in_drawEntity(interface_t *in, entity_t *e);
 
 // needs to be called AFTER draw calls

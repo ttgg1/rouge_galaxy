@@ -50,7 +50,7 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   }
 
   // create SDL window and renderer
-  int win_w = res->w * res->grid_cell_w;
+  int win_w = res->w * res->grid_cell_w * 2;
   int win_h = res->h * res->grid_cell_h;
 
   if (SDL_CreateWindowAndRenderer(win_w, win_h, SDL_WINDOW_OPENGL, &res->win,
@@ -107,8 +107,8 @@ void in_drawAt(interface_t *in, char c, ivec2_t pos) {
   }
 }
 
-void drawEntityColored(interface_t *in, uint32_t c, SDL_Color color,
-                       ivec2_t pos) {
+void in_drawAtColored(interface_t *in, uint32_t c, SDL_Color color,
+                      ivec2_t pos) {
   int index = GET_GRID_INDEX(pos.x, pos.y, in->grid_cell_w);
 
   if (in->grid == NULL || in->colormap == NULL) {
@@ -124,7 +124,7 @@ void in_drawEntity(interface_t *in, entity_t *e) {
 #ifndef COLOR
   in_drawAt(in, e->c, e->pos);
 #else
-  drawEntityColored(in, e->c, e->color, e->pos);
+  in_drawAtColored(in, e->c, e->color, e->pos);
 #endif
 }
 
@@ -155,7 +155,8 @@ void in_drawPresent(interface_t *in) {
 #else
   // TODO: maybe use one big texture that is filled with surfaces
   //  draw colored in 32 bit encoding (much slower)
-  SDL_Rect pos_r = {.x = 0, .y = 0, .w = in->grid_cell_w, .h = in->grid_cell_h};
+  SDL_Rect pos_r = {
+      .x = 0, .y = 0, .w = in->grid_cell_w * 2, .h = in->grid_cell_h};
   for (int i = 0; i < in->h * in->w; ++i) {
     SDL_Surface *s =
         TTF_RenderGlyph32_Shaded(in->f, in->grid[i], in->colormap[i], in_bg);
@@ -167,8 +168,8 @@ void in_drawPresent(interface_t *in) {
     SDL_DestroyTexture(t);
 
     // increase position
-    pos_r.x += in->grid_cell_w;
-    if (pos_r.x >= in->w * in->grid_cell_w) {
+    pos_r.x += in->grid_cell_w * 2;
+    if (pos_r.x >= in->w * in->grid_cell_w * 2) {
       pos_r.x = 0;
       pos_r.y += in->grid_cell_h;
     }

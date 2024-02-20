@@ -1,11 +1,12 @@
 #include "game.h"
-
+#include "interface.h"
+#include <stdint.h>
 
 uint8_t num_entities = 0;
 
 void draw(game_t *g) {
   in_clearScreen(g->in);
-  //draw stuff
+  // draw stuff
   gm_updateGrid(g);
 
   in_drawPresent(g->in);
@@ -46,9 +47,7 @@ void gm_stop(game_t *g) {
   free(g);
 }
 
-void gm_addEntity(entity_t *e, game_t *g) {
-  li_push(g->en_list, e);
-}
+void gm_addEntity(entity_t *e, game_t *g) { li_push(g->en_list, e); }
 
 /*
   odd grid_w and grid_h for centered player
@@ -67,7 +66,6 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   // init entity linked list
   g->en_list = li_emptyList();
 
-
   // add Player to Entity list
   gm_addEntity(g->p->e, g);
 
@@ -75,22 +73,21 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
 }
 
 bool gm_entityOnGrid(entity_t *e, game_t *g) {
-  return e->pos.x >= g->p->e->pos.x - g->in->w / 2 
-      && e->pos.x <= g->p->e->pos.x + g->in->w / 2
-      && e->pos.y >= g->p->e->pos.y - g->in->h / 2 
-      && e->pos.y <= g->p->e->pos.y + g->in->h / 2;
+  return e->pos.x >= g->p->e->pos.x - g->in->w / 2 &&
+         e->pos.x <= g->p->e->pos.x + g->in->w / 2 &&
+         e->pos.y >= g->p->e->pos.y - g->in->h / 2 &&
+         e->pos.y <= g->p->e->pos.y + g->in->h / 2;
 }
-
 
 void gm_updateGrid(game_t *g) {
   // clear grid
-  memset(g->in->grid, '.', g->in->w * g->in->h * sizeof(char));
+  // memset(g->in->grid, '.', g->in->w * g->in->h * sizeof(char));
 
   int offsetY, offsetX;
   offsetY = g->in->h / 2;
   offsetX = g->in->w / 2;
 
-  // handle map 
+  // handle map
 
   // TODO
 
@@ -99,7 +96,10 @@ void gm_updateGrid(game_t *g) {
   entity_node_t *current = g->en_list->head;
   while (current != NULL) {
     if (current->value != NULL && gm_entityOnGrid(current->value, g)) {
-      in_drawAt(g->in, current->value->c, (ivec2_t){current->value->pos.x - g->p->e->pos.x + offsetX, current->value->pos.y - g->p->e->pos.y + offsetY});
+      current->value->pos = (ivec2_t){
+          (int16_t)(current->value->pos.x - g->p->e->pos.x + offsetX),
+          (int16_t)(current->value->pos.y - g->p->e->pos.y + offsetY)};
+      in_drawEntity(g->in, current->value);
     }
     current = current->next;
   }
