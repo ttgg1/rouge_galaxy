@@ -6,7 +6,7 @@ cc = meson.get_compiler('c')
 m_dep = cc.find_library('m', required : false)
 sdl2_dep = dependency('SDL2', required : true)
 sdl2_ttf_dep = dependency('SDL2_ttf', required : true)
-sdl2_main_dep = dependency('sdl2main', required: true)
+sdl2_main_dep = dependency('sdl2main', required: false) # only required on Windows
 
 #add_project_dependencies([m_dep,sdl2_dep,sdl2_ttf_dep,sdl2_main_dep],language: 'c')
 

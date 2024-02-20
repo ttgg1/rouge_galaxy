@@ -27,18 +27,22 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   }
 
   // Open Font
+  char *relPath;
+#ifdef __LINUX__
+  relPath = "/../../assets/unifont-15.1.04.otf";
+#else
+  relPath = "\\..\\assets\\unifont-15.1.04.otf";
+#endif
 
-  char *relPath = "\\..\\assets\\FiraMono.ttf";
   int pathLenght = cwdPathLenght(relPath);
   char path[pathLenght];
   cwdJoinPath(relPath, path);
   res->f = TTF_OpenFont(path, (int)ptsize);
-  if (res->f == NULL)
-  {
-      debug_print("SDL2_ttf Failed to intitialize the Font: %s \n",
-                  SDL_GetError());
+  if (res->f == NULL) {
+    debug_print("SDL2_ttf Failed to intitialize the Font: %s \n",
+                SDL_GetError());
   }
-  
+
   // get grid_cell_w and h
   if (TTF_SizeUTF8(res->f, " ", (int *)&res->grid_cell_w,
                    (int *)&res->grid_cell_h) < 0) {
@@ -58,7 +62,7 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   SDL_SetWindowTitle(res->win, "Rouge Galaxy");
 
   // init Grid
-  
+
   size_t nobjs = (res->w * res->h) + 1;
 #ifndef COLOR
   res->grid = calloc(nobjs, sizeof(char));
@@ -73,7 +77,7 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
 #endif
   // terminate String
   res->grid[nobjs] = '\0';
-  
+
   return res;
 }
 
@@ -172,7 +176,6 @@ void in_drawPresent(interface_t *in) {
   SDL_RenderPresent(in->r);
 #endif
 }
-
 
 void in_clearScreen(interface_t *in) {
   int nobjs = in->w * in->h;
