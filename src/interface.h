@@ -46,6 +46,10 @@ void in_destroy(interface_t *in);
 void in_drawAt(interface_t *in, char c, ivec2_t pos);
 void in_drawAtColored(interface_t *in, uint32_t c, SDL_Color color,
                       ivec2_t pos);
+
+void in_drawArrayColored(interface_t *in, uint32_t *chars, SDL_Color *colors,
+                         ivec2_t start_pos, int len, int wrap_length);
+
 void in_drawEntity(interface_t *in, entity_t *e);
 
 // needs to be called AFTER draw calls

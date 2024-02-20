@@ -128,6 +128,30 @@ void in_drawAtColored(interface_t *in, uint32_t c, SDL_Color color,
 #endif
 }
 
+void in_drawArrayColored(interface_t *in, uint32_t *chars, SDL_Color *colors,
+                         ivec2_t start_pos, int len, int wrap_length) {
+  ivec2_t pos = start_pos;
+  for (int i = 0; i < len; ++i) {
+    // if color is not initialized set it to background color
+    if (colors[i].a == 0 && colors[i].r == 0 && colors[i].g == 0 &&
+        colors[i].b == 0) {
+      colors[i] = in_bg;
+    }
+
+    in_drawAtColored(in, chars[i], colors[i], pos);
+
+    ++pos.x;
+    if (pos.x > wrap_length) {
+      pos.x = start_pos.x;
+      ++pos.y;
+    }
+    if (pos.y > in->h) {
+      debug_print("Array item Pos out of bounds !!\n");
+      return;
+    }
+  }
+}
+
 void in_drawEntity(interface_t *in, entity_t *e) {
 #ifndef COLOR
   in_drawAt(in, e->c, e->pos);

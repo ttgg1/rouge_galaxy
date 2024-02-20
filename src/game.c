@@ -4,10 +4,15 @@
 
 uint8_t num_entities = 0;
 
+void drawUi(game_t *g) {
+  // TODO -> create uiWindowList
+}
+
 void draw(game_t *g) {
   in_clearScreen(g->in);
   // draw stuff
   gm_updateGrid(g);
+  drawUi(g);
 
   in_drawPresent(g->in);
 }

@@ -4,6 +4,7 @@
 
 #include "entity.h"
 #include "game.h"
+#include "ui.h"
 #include "vecMath.h"
 
 int main(int argc, char **argv) {
