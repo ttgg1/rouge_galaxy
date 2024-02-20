@@ -8,9 +8,6 @@
 #include <stdint.h>
 #include <string.h>
 
-SDL_Color in_bg = {20, 20, 20, 255};
-SDL_Color in_fg = {200, 200, 200, 255};
-
 interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   interface_t *res = malloc(sizeof(interface_t));
 
@@ -133,10 +130,10 @@ void in_drawArrayColored(interface_t *in, uint32_t *chars, SDL_Color *colors,
   ivec2_t pos = start_pos;
   for (int i = 0; i < len; ++i) {
     // if color is not initialized set it to background color
-    if (colors[i].a == 0 && colors[i].r == 0 && colors[i].g == 0 &&
-        colors[i].b == 0) {
-      colors[i] = in_bg;
-    }
+    /* if (colors[i].a == 0 && colors[i].r == 0 && colors[i].g == 0 && */
+    /*     colors[i].b == 0) { */
+    /*   colors[i] = in_bg; */
+    /* } */
 
     in_drawAtColored(in, chars[i], colors[i], pos);
 

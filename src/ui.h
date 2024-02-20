@@ -32,6 +32,13 @@ ui_win_t *ui_createWindow(ivec2_t pos, uint16_t width, uint16_t height,
                           SDL_Color borderColor, SDL_Color textColor);
 
 void ui_drawWindow(ui_win_t *win, interface_t *in);
+void ui_updateWindowText(ui_win_t *win, char *text);
+void ui_updateWindowTextColor(ui_win_t *win, SDL_Color textColor);
+void ui_updateWindowTextAndColor(ui_win_t *win, char *text,
+                                 SDL_Color textColor);
+
+void ui_clearWindowText(ui_win_t *win);
+void ui_clearWindowTextColor(ui_win_t *win);
 
 void ui_destroyWindow(ui_win_t *win);
 

@@ -1,11 +1,16 @@
 #include "game.h"
-#include "interface.h"
-#include <stdint.h>
 
 uint8_t num_entities = 0;
 
 void drawUi(game_t *g) {
-  // TODO -> create uiWindowList
+  node_t *curr = g->uiWindowList->head;
+  while (curr != NULL) {
+    ui_win_t *curr_val = (ui_win_t *)curr->value;
+
+    ui_drawWindow(curr_val, g->in);
+
+    curr = curr->next;
+  }
 }
 
 void draw(game_t *g) {
@@ -49,10 +54,13 @@ void gm_stop(game_t *g) {
   pl_destroyPlayer(g->p);
   in_destroy(g->in);
   li_destroy(g->en_list);
+  li_destroy(g->active_entities);
   free(g);
 }
 
 void gm_addEntity(entity_t *e, game_t *g) { li_push(g->en_list, e); }
+
+void gm_addUiWindow(ui_win_t *win, game_t *g) { li_push(g->uiWindowList, win); }
 
 /*
   odd grid_w and grid_h for centered player
@@ -70,6 +78,8 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
 
   // init entity linked list
   g->en_list = li_emptyList();
+  g->active_entities = li_emptyList();
+  g->uiWindowList = li_emptyList();
 
   // add Player to Entity list
   gm_addEntity(g->p->e, g);
@@ -97,14 +107,15 @@ void gm_updateGrid(game_t *g) {
   // TODO
 
   // handle entities
-
-  entity_node_t *current = g->en_list->head;
+  // TODO: refactor to use active_entities list
+  node_t *current = g->en_list->head;
   while (current != NULL) {
+    entity_t *curr_val = (entity_t *)current->value;
     if (current->value != NULL && gm_entityOnGrid(current->value, g)) {
-      ivec2_t pos = (ivec2_t){
-          (int16_t)(current->value->pos.x - g->p->e->pos.x + offsetX),
-          (int16_t)(current->value->pos.y - g->p->e->pos.y + offsetY)};
-      in_drawAtColored(g->in, current->value->c, current->value->color, pos);
+      ivec2_t pos =
+          (ivec2_t){(int16_t)((curr_val->pos.x) - g->p->e->pos.x + offsetX),
+                    (int16_t)((curr_val->pos.y) - g->p->e->pos.y + offsetY)};
+      in_drawAtColored(g->in, curr_val->c, curr_val->color, pos);
     }
     current = current->next;
   }
