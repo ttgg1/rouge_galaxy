@@ -1,6 +1,9 @@
 #ifndef INTERFACE_H_
 #define INTERFACE_H_
 
+#define COLOR 1
+#define GET_GRID_INDEX(x, y, w) x + y *w
+
 #include "entity.h"
 #include "utils.h"
 #include "vecMath.h"
@@ -10,7 +13,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-
+#ifndef COLOR
 typedef struct interface {
   uint8_t w;
   uint8_t h;
@@ -22,6 +25,20 @@ typedef struct interface {
   SDL_Renderer *r;
   TTF_Font *f;
 } interface_t;
+#else
+typedef struct interface {
+  uint8_t w;
+  uint8_t h;
+  uint8_t grid_cell_w;
+  uint8_t grid_cell_h;
+  uint32_t *grid;
+  SDL_Color *colormap;
+
+  SDL_Window *win;
+  SDL_Renderer *r;
+  TTF_Font *f;
+} interface_t;
+#endif
 
 interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize);
 void in_destroy(interface_t *in);

@@ -1,9 +1,12 @@
 #include "player.h"
 
-player_t *pl_createPlayer(ivec2_t pos) {
-  player_t *res;
-  res = (player_t *) malloc(sizeof(player_t));
-  res->e = en_create(0, pos, 'P');
+
+player_t pl_createPlayer(ivec2_t pos) {
+  player_t res;
+  res.e = (entity_t){.ID = 0,
+                     .pos = pos,
+                     .c = 'P',
+                     .color = {.r = 10, .g = 128, .b = 128, .a = 255}};
 
   return res;
 }
