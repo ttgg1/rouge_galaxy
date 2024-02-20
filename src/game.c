@@ -96,14 +96,11 @@ void gm_updateGrid(game_t *g) {
   entity_node_t *current = g->en_list->head;
   while (current != NULL) {
     if (current->value != NULL && gm_entityOnGrid(current->value, g)) {
-      current->value->pos = (ivec2_t){
+      ivec2_t pos = (ivec2_t){
           (int16_t)(current->value->pos.x - g->p->e->pos.x + offsetX),
           (int16_t)(current->value->pos.y - g->p->e->pos.y + offsetY)};
-      in_drawEntity(g->in, current->value);
+      in_drawAtColored(g->in, current->value->c, current->value->color, pos);
     }
     current = current->next;
   }
-
-  // set EoL
-  g->in->grid[g->in->w * g->in->h] = '\0';
 }
