@@ -9,6 +9,7 @@
 #include "vecMath.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>

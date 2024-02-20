@@ -1,15 +1,13 @@
 #include "game.h"
-#include <stdio.h>
+
 
 uint8_t num_entities = 0;
 
 void draw(game_t *g) {
   in_clearScreen(g->in);
-  // draw stuff
-  for (int i = num_entities - 1; i >= 0; --i) {
-    // draw all entities
-    in_drawEntity(g->in, g->en_list[i]);
-  }
+  //draw stuff
+  gm_updateGrid(g);
+
   in_drawPresent(g->in);
 }
 
@@ -22,7 +20,7 @@ void handleEvents(game_t *g) {
       break;
 
     case SDL_KEYDOWN:
-      pl_handleMovement(&g->p, &e);
+      pl_handleMovement(g->p, &e);
       break;
     }
   }
@@ -42,31 +40,19 @@ void gm_start(game_t *g) {
 
 void gm_stop(game_t *g) {
   g->isRunning = false;
-  free(g->en_list);
+  pl_destroyPlayer(g->p);
   in_destroy(g->in);
+  li_destroy(g->en_list);
   free(g);
 }
 
 void gm_addEntity(entity_t *e, game_t *g) {
-  // allocate memory if not created
-  if (num_entities == 0) {
-    g->en_list = malloc(sizeof(entity_t));
-  } else {
-    // if there is already an entity list allocated -> realloc
-    entity_t *en_temp_p =
-        realloc(g->en_list, (num_entities + 1) * sizeof(entity_t));
-    // check if realloc worked
-    if (en_temp_p == NULL) {
-      debug_print("Enity-List failed to reallocate !!\n");
-    } else {
-      g->en_list = en_temp_p;
-    }
-  }
-  // add Entity to list
-  g->en_list[num_entities] = e;
-  ++num_entities;
+  li_push(g->en_list, e);
 }
 
+/*
+  odd grid_w and grid_h for centered player
+*/
 game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   game_t *g = malloc(sizeof(game_t));
   interface_t *inter;
@@ -78,8 +64,46 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   // Spawns player at 0,0
   g->p = pl_createPlayer((ivec2_t){0, 0});
 
+  // init entity linked list
+  g->en_list = li_emptyList();
+
+
   // add Player to Entity list
-  gm_addEntity(&g->p.e, g);
+  gm_addEntity(g->p->e, g);
 
   return g;
+}
+
+bool gm_entityOnGrid(entity_t *e, game_t *g) {
+  return e->pos.x >= g->p->e->pos.x - g->in->w / 2 
+      && e->pos.x <= g->p->e->pos.x + g->in->w / 2
+      && e->pos.y >= g->p->e->pos.y - g->in->h / 2 
+      && e->pos.y <= g->p->e->pos.y + g->in->h / 2;
+}
+
+
+void gm_updateGrid(game_t *g) {
+  // clear grid
+  memset(g->in->grid, '.', g->in->w * g->in->h * sizeof(char));
+
+  int offsetY, offsetX;
+  offsetY = g->in->h / 2;
+  offsetX = g->in->w / 2;
+
+  // handle map 
+
+  // TODO
+
+  // handle entities
+
+  entity_node_t *current = g->en_list->head;
+  while (current != NULL) {
+    if (current->value != NULL && gm_entityOnGrid(current->value, g)) {
+      in_drawAt(g->in, current->value->c, (ivec2_t){current->value->pos.x - g->p->e->pos.x + offsetX, current->value->pos.y - g->p->e->pos.y + offsetY});
+    }
+    current = current->next;
+  }
+
+  // set EoL
+  g->in->grid[g->in->w * g->in->h] = '\0';
 }

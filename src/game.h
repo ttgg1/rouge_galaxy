@@ -1,18 +1,22 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include <stdbool.h>
+#include <string.h>
+
 #include "entity.h"
 #include "interface.h"
 #include "player.h"
 #include "utils.h"
-#include <stdbool.h>
-#include <string.h>
+#include "entityList.h"
+
 
 typedef struct game {
   bool isRunning;
   interface_t *in;
-  entity_t *(*en_list);
-  player_t p;
+  entity_list_t *en_list;
+  entity_list_t *active_entities;
+  player_t *p;
 } game_t;
 
 void gm_start(game_t *g);
@@ -21,5 +25,9 @@ void gm_stop(game_t *g);
 void gm_addEntity(entity_t *e, game_t *g);
 
 game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize);
+
+void gm_updateGrid(game_t *g);
+
+bool gm_entityOnGrid(entity_t *e, game_t *g);
 
 #endif // GAME_H_

@@ -27,12 +27,18 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   }
 
   // Open Font
-  res->f = TTF_OpenFont("../../assets/FiraMono.ttf", (int)ptsize);
-  if (res->f == NULL) {
-    debug_print("SDL2_ttf Failed to intitialize the Font: %s \n",
-                SDL_GetError());
-  }
 
+  char *relPath = "\\..\\assets\\FiraMono.ttf";
+  int pathLenght = cwdPathLenght(relPath);
+  char path[pathLenght];
+  cwdJoinPath(relPath, path);
+  res->f = TTF_OpenFont(path, (int)ptsize);
+  if (res->f == NULL)
+  {
+      debug_print("SDL2_ttf Failed to intitialize the Font: %s \n",
+                  SDL_GetError());
+  }
+  
   // get grid_cell_w and h
   if (TTF_SizeUTF8(res->f, " ", (int *)&res->grid_cell_w,
                    (int *)&res->grid_cell_h) < 0) {
@@ -40,8 +46,8 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   }
 
   // create SDL window and renderer
-  int win_w = res->w * res->grid_cell_w + 1;
-  int win_h = res->h * res->grid_cell_h + 1;
+  int win_w = res->w * res->grid_cell_w;
+  int win_h = res->h * res->grid_cell_h;
 
   if (SDL_CreateWindowAndRenderer(win_w, win_h, SDL_WINDOW_OPENGL, &res->win,
                                   &res->r) < 0) {
@@ -52,6 +58,7 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   SDL_SetWindowTitle(res->win, "Rouge Galaxy");
 
   // init Grid
+  
   size_t nobjs = (res->w * res->h) + 1;
 #ifndef COLOR
   res->grid = calloc(nobjs, sizeof(char));
@@ -66,7 +73,7 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
 #endif
   // terminate String
   res->grid[nobjs] = '\0';
-
+  
   return res;
 }
 
@@ -85,7 +92,10 @@ void in_destroy(interface_t *in) {
 
 void in_drawAt(interface_t *in, char c, ivec2_t pos) {
   int index = pos.x + pos.y * in->w;
-
+  if (index < 0 || index >= in->h * in->w) {
+    debug_print("Tried to write to out-of-bounds !\n");
+    return;
+  }
   if (in->grid == NULL) {
     debug_print("Tried to write to an uninitialized grid array !\n");
   } else {
@@ -162,6 +172,7 @@ void in_drawPresent(interface_t *in) {
   SDL_RenderPresent(in->r);
 #endif
 }
+
 
 void in_clearScreen(interface_t *in) {
   int nobjs = in->w * in->h;
