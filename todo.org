@@ -5,13 +5,13 @@
 2D - Rouglike turn based dungeon crawler
 
 * Game.c
-- draw function -> iterate entity list
-- gameloop -> turn based mode
+- +draw function -> iterate entity list+
+- +gameloop+ -> turn based mode
 - if no encounter -> real time mode -> bool isTurnBased in gamestruct
-- game struct
+- +game struct+
 
 * interface.c
-- +ncurces.h+ -> REWRITE with SDL2_ttf
+- +ncurces.h+ +-> REWRITE with SDL2_ttf+
 - draw char with color
 - draw array (with color)
 
@@ -27,7 +27,7 @@
 - extensive skill/spell system (space themed: spells -> "science gadgets")
 
 * player.c
-- handle player events
+- +handle player events+
 
 * level.c
 - handle level progression of player
@@ -35,7 +35,7 @@
 - very customizable/broad spectrum of effects
 
 * entity.c
-- gets drawn on the screen
+- +gets drawn on the screen+
 - [X] entity struct
   - [X] ID
   - [X] char

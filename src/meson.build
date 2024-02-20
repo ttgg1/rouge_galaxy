@@ -11,4 +11,4 @@ foreach item : sources
   endif
 endforeach
 
-this_dep = declare_dependency(dependencies: [m_dep], include_directories: inc,objects: e.extract_objects(sources_objs))
+this_dep = declare_dependency(dependencies: [m_dep,sdl2_dep,sdl2_ttf_dep], include_directories: inc,objects: e.extract_objects(sources_objs))
