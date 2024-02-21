@@ -73,7 +73,7 @@ void li_destroy(list_t *list) {
   free(list);
 }
 
-void li_append(list_t *list, entity_t *value) {
+void li_append(list_t *list, void *value) {
   node_t *node;
   node = (node_t *)malloc(sizeof(node_t));
   if (node == NULL) {
@@ -98,7 +98,7 @@ void li_append(list_t *list, entity_t *value) {
   list->size++;
 }
 
-void li_push(list_t *list, entity_t *value) {
+void li_push(list_t *list, void *value) {
   node_t *node;
   node = (node_t *)malloc(sizeof(node_t));
   if (node == NULL) {
@@ -111,11 +111,11 @@ void li_push(list_t *list, entity_t *value) {
   list->size++;
 }
 
-entity_t *li_pop(list_t *list) {
+void *li_pop(list_t *list) {
   if (list->head == NULL) {
     return NULL;
   }
-  entity_t *value = list->head->value;
+  void *value = list->head->value;
   node_t *temp = list->head->next;
   // li_destroyNode(list->head);
   list->head = temp;

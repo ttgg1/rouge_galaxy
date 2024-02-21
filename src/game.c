@@ -111,7 +111,7 @@ void gm_updateGrid(game_t *g) {
   node_t *current = g->en_list->head;
   while (current != NULL) {
     entity_t *curr_val = (entity_t *)current->value;
-    if (current->value != NULL && gm_entityOnGrid(current->value, g)) {
+    if (curr_val != NULL && gm_entityOnGrid(curr_val, g)) {
       ivec2_t pos =
           (ivec2_t){(int16_t)((curr_val->pos.x) - g->p->e->pos.x + offsetX),
                     (int16_t)((curr_val->pos.y) - g->p->e->pos.y + offsetY)};

@@ -3,6 +3,11 @@
 
 #define COLOR 1
 #define GET_GRID_INDEX(x, y, w) (x + (y * w))
+// foreground and background colors
+#define in_bg                                                                  \
+  (SDL_Color) { 20, 20, 20, 255 }
+#define in_fg                                                                  \
+  (SDL_Color) { 200, 200, 200, 255 }
 
 #include "entity.h"
 #include "utils.h"
@@ -39,10 +44,6 @@ typedef struct interface {
   TTF_Font *f;
 } interface_t;
 #endif
-
-// foreground and background colors
-SDL_Color in_bg = {20, 20, 20, 255};
-SDL_Color in_fg = {200, 200, 200, 255};
 
 interface_t *in_create(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize);
 void in_destroy(interface_t *in);
