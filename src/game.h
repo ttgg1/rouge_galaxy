@@ -11,6 +11,7 @@
 #include "player.h"
 #include "ui.h"
 #include "utils.h"
+#include "map.h"
 
 typedef struct game {
   bool isRunning;

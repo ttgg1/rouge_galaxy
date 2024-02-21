@@ -4,13 +4,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "utils.h"
+#include <stdint.h>
 
 typedef struct quadTree {
     struct quadTree *nw;
     struct quadTree *ne;
     struct quadTree *sw;
     struct quadTree *se;
-    char value;
+    uint32_t value;
 } quadTree_t;
 
 
@@ -37,7 +38,7 @@ bool m_inBoundsSE(map_t *m, int y, int x);
 
 quadTree_t *m_getContainingTree(map_t *m, int y, int x, int *h, int *offY, int *offX);
 
-void m_setAt(map_t *m, int y, int x, char c);
-char *m_getAt(map_t *m, int y, int x);
+void m_setAt(map_t *m, int y, int x, uint32_t c);
+uint32_t m_getAt(map_t *m, int y, int x);
 
 #endif // MAP_H

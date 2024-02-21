@@ -46,7 +46,7 @@ map_t *m_create() {
         debug_print("Failed to create quadTree_t for map_t ! \n");
     }
     
-    t->value = '.';
+    t->value = (uint32_t)'.';
     m->t = t;
     m->height = 0;
     return m;
@@ -64,7 +64,6 @@ void m_destroy(map_t *m) {
 
 
 bool m_inBounds(map_t *m, int y, int x) {
-    printf("inBounds: y: %d, x: %d, h: %d | %d %d %d %d\n", y, x, m->height, -(1 << (m->height - 1)) + 1, (1 << (m->height - 1)), -(1 << (m->height - 1)) + 1, (1 << (m->height - 1)));
     if (m->height == 0) {
         return y == 0 && x == 0;
     }
@@ -164,7 +163,7 @@ quadTree_t *m_getContainingTree(map_t *m, int y, int x, int *height, int *offY, 
 }
 
 
-void m_setAt(map_t *m, int y, int x, char c) {
+void m_setAt(map_t *m, int y, int x, uint32_t c) {
 
     // offsets for translating local tree coordinates
     int offsetY, offsetX, h;
@@ -239,7 +238,6 @@ void m_setAt(map_t *m, int y, int x, char c) {
 
     // expand tree
     quadTree_t *newTree = qt_create();
-    char null = NULL;
 
     // NW
     newTree->nw = qt_create();
@@ -304,10 +302,10 @@ void m_setAt(map_t *m, int y, int x, char c) {
     m_setAt(m, y, x, c);
 }
 
-char *m_getAt(map_t *m, int y, int x) {
+uint32_t m_getAt(map_t *m, int y, int x) {
     if (!m_inBounds(m, y, x)) {
         // not in initialized area
-        return '.';
+        return (uint32_t)'#';
     }
     // offsets for translating local tree coordinates
     int offsetY, offsetX, h;

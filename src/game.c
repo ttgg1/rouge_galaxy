@@ -81,6 +81,9 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   g->active_entities = li_emptyList();
   g->uiWindowList = li_emptyList();
 
+  // init map
+  g->map = m_create();
+
   // add Player to Entity list
   gm_addEntity(g->p->e, g);
 
@@ -104,7 +107,16 @@ void gm_updateGrid(game_t *g) {
 
   // handle map
 
-  // TODO
+  for (int y = 0; y < g->in->h; y++) {
+    for (int x = 0; x < g->in->w; x++) {
+      in_drawAtColored(
+        g->in,
+        m_getAt(g->map, y + g->p->e->pos.y - offsetY, x + g->p->e->pos.x - offsetX),
+        (SDL_Color){200, 200, 200, 255},
+        (ivec2_t){x,y}
+      );
+    }
+  }
 
   // handle entities
   // TODO: refactor to use active_entities list

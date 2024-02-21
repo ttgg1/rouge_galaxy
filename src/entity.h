@@ -26,6 +26,6 @@ typedef struct entity {
 
 void en_move(entity_t *e, int16_t x_step, int16_t y_step);
 
-entity_t *en_create(uint8_t id, ivec2_t pos, char c);
+entity_t *en_create(uint8_t id, ivec2_t pos, uint32_t c, SDL_Color color);
 
 #endif // ENTITY_H_

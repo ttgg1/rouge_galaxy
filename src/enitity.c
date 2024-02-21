@@ -6,7 +6,7 @@ void en_move(entity_t *e, int16_t x_step, int16_t y_step) {
 
 }
 
-entity_t *en_create(uint8_t id, ivec2_t pos, char c) {
+entity_t *en_create(uint8_t id, ivec2_t pos, uint32_t c, SDL_Color color) {
   entity_t *e;
   e = (entity_t *) malloc(sizeof(entity_t));
   if (e == NULL) {
@@ -15,5 +15,6 @@ entity_t *en_create(uint8_t id, ivec2_t pos, char c) {
   e->ID = id;
   e->pos = pos;
   e->c = c;
+  e->color = color;
   return e;
 }

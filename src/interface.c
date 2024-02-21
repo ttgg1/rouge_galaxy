@@ -211,10 +211,12 @@ void in_clearScreen(interface_t *in) {
 #ifndef COLOR
   memset(in->grid, '.', nobjs * sizeof(char));
 #else
+/*
   for (int i = 0; i < nobjs; ++i) {
     in->colormap[i] = in_fg;
     in->grid[i] = (uint32_t)'.';
   }
+*/
 #endif
   SDL_SetRenderDrawColor(in->r, in_bg.r, in_bg.g, in_bg.b, in_bg.a);
   SDL_RenderClear(in->r);

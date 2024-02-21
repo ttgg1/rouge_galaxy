@@ -2,10 +2,7 @@
 
 player_t *pl_createPlayer(ivec2_t pos) {
   player_t *res = malloc(sizeof(player_t));
-  *res->e = (entity_t){.ID = 0,
-                       .pos = pos,
-                       .c = 'P',
-                       .color = {.r = 10, .g = 128, .b = 128, .a = 255}};
+  res->e = en_create(0, pos, 'P', (SDL_Color){.r = 10, .g = 128, .b = 128, .a = 255});
 
   return res;
 }
