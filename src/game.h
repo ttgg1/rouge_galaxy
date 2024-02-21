@@ -17,10 +17,9 @@ typedef struct game {
   bool isRunning;
   interface_t *in;
   player_t *p;
-
   list_t *en_list;
   list_t *active_entities;
-
+  map_t *map;
   list_t *uiWindowList;
 } game_t;
 
