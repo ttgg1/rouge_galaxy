@@ -1,8 +1,7 @@
 #include "ui.h"
-#include "interface.h"
 
 void drawBorders(ui_win_t *win, ui_win_border_t borderStyle,
-                 SDL_Color borderColor) {
+                 Color borderColor) {
   // set Borders
   uint32_t borderChar = 0;
 
@@ -33,58 +32,59 @@ void drawBorders(ui_win_t *win, ui_win_border_t borderStyle,
     break;
   }
 
-  // set Colormap
-  // set top and bottom
-  for (int i = 0; i < win->w; ++i) {
-    win->colormap[i] = borderColor;
-    win->colormap[(win->h * win->w - 1) - i] = borderColor;
-  }
-  // set sides
-  for (int i = 0; i < win->h; ++i) {
-    win->colormap[i * win->h] = borderColor;
-    win->colormap[i * win->h + win->w] = borderColor;
-  }
-
   if (borderChar != 0) {
     // set top and bottom
     for (int i = 0; i < win->w; ++i) {
-      win->content[i] = borderChar;
-      win->content[(win->h * win->w - 1) - i] = borderChar;
+      win->content[i][0] = (int)borderChar;
+      win->content[i][win->h - 1] = (int)borderChar;
+
+      win->colormap[i][0] = borderColor;
+      win->colormap[i][win->h - 1] = borderColor;
     }
     // set sides
     for (int i = 0; i < win->h; ++i) {
-      win->content[i * win->h] = borderChar;
-      win->content[i * win->h + win->w] = borderChar;
+      win->content[0][i] = (int)borderChar;
+      win->content[win->w - 1][i] = (int)borderChar;
+
+      win->colormap[0][i] = borderColor;
+      win->colormap[win->w - 1][i] = borderColor;
     }
   } else { // handle constructed borders
+    // set Colormap
+    // set top and bottom
+    for (int i = 0; i < win->w; ++i) {
+      win->colormap[i][0] = borderColor;
+      win->colormap[i][win->h - 1] = borderColor;
+    }
+    // set sides
+    for (int i = 0; i < win->h; ++i) {
+      win->colormap[0][i] = borderColor;
+      win->colormap[win->w - 1][i] = borderColor;
+    }
     // set top and bottom
     for (int i = 1; i < win->w - 1; ++i) {
       // sets corresponding char -> borderStyle ? BORDER_LINE : BORDER_PIPE
-      win->content[i] = borderStyle ? (uint32_t)196 : (uint32_t)205;
-      win->content[(win->h * win->w - 1) - i] =
-          borderStyle ? (uint32_t)196 : (uint32_t)205;
+      win->content[i][0] = borderStyle ? (int)196 : (int)205;
+      win->content[i][win->h - 1] = borderStyle ? (int)196 : (int)205;
     }
     // set sides
     for (int i = 1; i < win->h - 1; ++i) {
-      win->content[i * win->h] = borderStyle ? (uint32_t)179 : (uint32_t)186;
-      win->content[i * win->h + win->w] =
-          borderStyle ? (uint32_t)179 : (uint32_t)186;
+      win->content[0][i] = borderStyle ? (int)179 : (int)186;
+      win->content[win->w - 1][i] = borderStyle ? (int)179 : (int)186;
     }
     // set corners
     // top-left
-    win->content[0] = borderStyle ? (uint32_t)218 : (uint32_t)201;
+    win->content[0][0] = borderStyle ? (int)218 : (int)201;
     // top-right
-    win->content[win->w] = borderStyle ? (uint32_t)191 : (uint32_t)187;
+    win->content[win->w][0] = borderStyle ? (int)191 : (int)187;
     // bottom-left
-    win->content[win->w * win->h - 1 - win->w] =
-        borderStyle ? (uint32_t)192 : (uint32_t)200;
+    win->content[0][win->h - 1] = borderStyle ? (int)192 : (int)200;
     // bottom-right
-    win->content[win->w * win->h - 1] =
-        borderStyle ? (uint32_t)217 : (uint32_t)188;
+    win->content[win->w - 1][win->h - 1] = borderStyle ? (int)217 : (int)188;
   }
 }
 
-void writeTextColored(ui_win_t *win, char *text, SDL_Color textColor) {
+void writeTextColored(ui_win_t *win, char *text, Color textColor) {
   const int text_len = (int)strlen(text);
   // check if text fits in window
   if (text_len > (win->w - 1 - INNER_PADDING) * (win->h - 1 - INNER_PADDING)) {
@@ -93,16 +93,18 @@ void writeTextColored(ui_win_t *win, char *text, SDL_Color textColor) {
   }
 
   // draw text wrapped
-  int curr_Index = 1 + INNER_PADDING;
+  int curr_y = 1 + INNER_PADDING;
+  int curr_x = 1 + INNER_PADDING;
   for (int i = 0; i < text_len; ++i) {
-    win->content[curr_Index] = (uint32_t)text[i];
-    win->colormap[curr_Index] = textColor;
+    win->content[curr_x][curr_y] = (int)text[i];
+    win->colormap[curr_x][curr_y] = textColor;
 
     // line wrap
-    if (i % win->w == 0) {
-      curr_Index += 1 + 2 * INNER_PADDING;
+    if (curr_x - 1 == win->w) {
+      ++curr_y;
+      curr_x = 1 + INNER_PADDING;
     } else {
-      ++curr_Index;
+      ++curr_x;
     }
   }
 }
@@ -116,22 +118,24 @@ void writeText(ui_win_t *win, char *text) {
   }
 
   // draw text wrapped
-  int curr_Index = 1 + INNER_PADDING;
+  int curr_y = 1 + INNER_PADDING;
+  int curr_x = 1 + INNER_PADDING;
   for (int i = 0; i < text_len; ++i) {
-    win->content[curr_Index] = (uint32_t)text[i];
+    win->content[curr_x][curr_y] = (int)text[i];
 
     // line wrap
-    if (i % win->w == 0) {
-      curr_Index += 1 + 2 * INNER_PADDING;
+    if (curr_x - 1 == win->w) {
+      ++curr_y;
+      curr_x = 1 + INNER_PADDING;
     } else {
-      ++curr_Index;
+      ++curr_x;
     }
   }
 }
 
 ui_win_t *ui_createWindow(ivec2_t pos, uint16_t width, uint16_t height,
                           char *text, ui_win_border_t borderStyle,
-                          SDL_Color borderColor, SDL_Color textColor) {
+                          Color borderColor, Color textColor) {
   ui_win_t *win = (ui_win_t *)malloc(sizeof(ui_win_t));
 
   win->w = width;
@@ -140,12 +144,14 @@ ui_win_t *ui_createWindow(ivec2_t pos, uint16_t width, uint16_t height,
 
   size_t nobjs = win->w * win->h;
 
-  win->content = (uint32_t *)calloc(nobjs, sizeof(uint32_t));
-  win->colormap = (SDL_Color *)malloc(nobjs * sizeof(SDL_Color));
+  win->content = (int **)calloc(nobjs, sizeof(int));
+  win->colormap = (Color **)malloc(nobjs * sizeof(Color));
 
   // set Colormap to backgroundcolor
-  for (int i = 0; i < (int)nobjs; ++i) {
-    win->colormap[i] = in_bg;
+  for (int j = 0; j < win->h; ++j) {
+    for (int i = 0; i < win->w; ++i) {
+      win->colormap[i][j] = in_bg;
+    }
   }
 
   drawBorders(win, borderStyle, borderColor);
@@ -161,13 +167,21 @@ void ui_drawWindow(ui_win_t *win, interface_t *in) {
 }
 
 void ui_clearWindowText(ui_win_t *win) {
-  int max_index = win->w * win->h - win->h - 1; // last line can be ignored
-  for (int i = 1 + INNER_PADDING; i < max_index; ++i) {
-    win->content[i] = ' ';
+  // set Color of entire text
+  int curr_y = 1 + INNER_PADDING;
+  int curr_x = 1 + INNER_PADDING;
+
+  int max_index = (win->w - 1 - INNER_PADDING) * (win->h - 1 - INNER_PADDING);
+
+  for (int i = 0; i < max_index; ++i) {
+    win->content[curr_x][curr_y] = (int)' ';
 
     // line wrap
-    if (i % win->w == 0) {
-      i += 2 * INNER_PADDING;
+    if (curr_x - 1 == win->w) {
+      ++curr_y;
+      curr_x = 1 + INNER_PADDING;
+    } else {
+      ++curr_x;
     }
   }
 }
@@ -180,20 +194,27 @@ void ui_updateWindowText(ui_win_t *win, char *text) {
   writeText(win, text);
 }
 
-void ui_updateWindowTextColor(ui_win_t *win, SDL_Color textColor) {
-  int max_index = win->w * win->h - win->h - 1; // last line can be ignored
-  for (int i = 1 + INNER_PADDING; i < max_index; ++i) {
-    win->colormap[i] = textColor;
+void ui_updateWindowTextColor(ui_win_t *win, Color textColor) {
+  // set Color of entire text
+  int curr_y = 1 + INNER_PADDING;
+  int curr_x = 1 + INNER_PADDING;
+
+  int max_index = (win->w - 1 - INNER_PADDING) * (win->h - 1 - INNER_PADDING);
+
+  for (int i = 0; i < max_index; ++i) {
+    win->colormap[curr_x][curr_y] = textColor;
 
     // line wrap
-    if (i % win->w == 0) {
-      i += 2 * INNER_PADDING;
+    if (curr_x - 1 == win->w) {
+      ++curr_y;
+      curr_x = 1 + INNER_PADDING;
+    } else {
+      ++curr_x;
     }
   }
 }
 
-void ui_updateWindowTextAndColor(ui_win_t *win, char *text,
-                                 SDL_Color textColor) {
+void ui_updateWindowTextAndColor(ui_win_t *win, char *text, Color textColor) {
   ui_clearWindowText(win);
   ui_clearWindowTextColor(win);
   writeTextColored(win, text, textColor);

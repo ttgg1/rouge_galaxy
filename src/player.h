@@ -3,7 +3,7 @@
 
 #include "entity.h"
 #include "vecMath.h"
-#include <SDL2/SDL.h>
+#include <raylib.h>
 
 typedef struct player {
   entity_t *e;
@@ -12,8 +12,7 @@ typedef struct player {
 player_t *pl_createPlayer(ivec2_t pos);
 void pl_destroyPlayer(player_t *);
 
-
-// call after case SDL_KEYDOWN
-void pl_handleMovement(player_t *p, SDL_Event *e);
+// call after case KEYDOWN
+void pl_handleMovement(player_t *p);
 
 #endif // PLAYER_H_

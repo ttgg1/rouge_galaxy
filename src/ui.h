@@ -4,6 +4,7 @@
 #include "interface.h"
 #include "utils.h"
 #include "vecMath.h"
+#include <raylib.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -23,19 +24,18 @@ typedef struct ui_window {
   uint16_t w;
   uint16_t h;
   ivec2_t pos;
-  uint32_t *content;
-  SDL_Color *colormap;
+  int **content;
+  Color **colormap;
 } ui_win_t;
 
 ui_win_t *ui_createWindow(ivec2_t pos, uint16_t width, uint16_t height,
                           char *text, ui_win_border_t borderStyle,
-                          SDL_Color borderColor, SDL_Color textColor);
+                          Color borderColor, Color textColor);
 
 void ui_drawWindow(ui_win_t *win, interface_t *in);
 void ui_updateWindowText(ui_win_t *win, char *text);
-void ui_updateWindowTextColor(ui_win_t *win, SDL_Color textColor);
-void ui_updateWindowTextAndColor(ui_win_t *win, char *text,
-                                 SDL_Color textColor);
+void ui_updateWindowTextColor(ui_win_t *win, Color textColor);
+void ui_updateWindowTextAndColor(ui_win_t *win, char *text, Color textColor);
 
 void ui_clearWindowText(ui_win_t *win);
 void ui_clearWindowTextColor(ui_win_t *win);

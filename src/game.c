@@ -1,4 +1,5 @@
 #include "game.h"
+#include <raylib.h>
 
 uint8_t num_entities = 0;
 
@@ -23,18 +24,11 @@ void draw(game_t *g) {
 }
 
 void handleEvents(game_t *g) {
-  SDL_Event e;
-  while (SDL_PollEvent(&e)) {
-    switch (e.type) {
-    case SDL_QUIT:
-      g->isRunning = false;
-      break;
-
-    case SDL_KEYDOWN:
-      pl_handleMovement(g->p, &e);
-      break;
-    }
+  if (WindowShouldClose()) {
+    g->isRunning = false;
+    gm_stop(g);
   }
+  pl_handleMovement(g->p);
 }
 
 void loop(game_t *g) {
@@ -66,7 +60,7 @@ void gm_addUiWindow(ui_win_t *win, game_t *g) { li_push(g->uiWindowList, win); }
   odd grid_w and grid_h for centered player
 */
 game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
-  game_t *g = malloc(sizeof(game_t));
+  game_t *g = (game_t *)malloc(sizeof(game_t));
   interface_t *inter;
 
   // create text interface and store it in game struct
@@ -115,7 +109,8 @@ void gm_updateGrid(game_t *g) {
       ivec2_t pos =
           (ivec2_t){(int16_t)((curr_val->pos.x) - g->p->e->pos.x + offsetX),
                     (int16_t)((curr_val->pos.y) - g->p->e->pos.y + offsetY)};
-      in_drawAtColored(g->in, curr_val->c, curr_val->color, pos);
+      // TODO: add UTF8 support HERE
+      in_drawAtColored(g->in, (char)curr_val->c, curr_val->color, pos);
     }
     current = current->next;
   }

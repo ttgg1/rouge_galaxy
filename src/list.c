@@ -1,6 +1,3 @@
-#include "SDL_error.h"
-#include "utils.h"
-
 #include "list.h"
 
 list_t *li_emptyList() {

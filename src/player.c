@@ -17,26 +17,22 @@ void pl_destroyPlayer(player_t *p) {
   free(p);
 }
 
-void pl_handleMovement(player_t *p, SDL_Event *e) {
-  switch (e->key.keysym.sym) {
-  case SDLK_UP:
+void pl_handleMovement(player_t *p) {
+  switch (GetKeyPressed()) {
+  case KEY_UP:
     en_move(p->e, 0, -1);
     break;
 
-  case SDLK_DOWN:
+  case KEY_DOWN:
     en_move(p->e, 0, 1);
     break;
 
-  case SDLK_RIGHT:
+  case KEY_RIGHT:
     en_move(p->e, 1, 0);
     break;
 
-  case SDLK_LEFT:
+  case KEY_LEFT:
     en_move(p->e, -1, 0);
-    break;
-
-  case SDLK_d:
-    1;
     break;
   }
 }
