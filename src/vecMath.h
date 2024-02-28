@@ -2,6 +2,7 @@
 #define VECMATH_H_
 
 #include <math.h>
+#include <raylib.h>
 #include <stdint.h>
 
 typedef struct ivec2 {
@@ -20,5 +21,8 @@ typedef struct imat22 {
 extern float fcross2(ivec2_t a, ivec2_t b);
 extern float fdot2(ivec2_t a, ivec2_t b);
 extern float fdist2(ivec2_t a, ivec2_t b);
+
+extern Vector2 ivec2ToVector2(ivec2_t v);
+extern Vector2 ivec2ToScreenspace(ivec2_t v, uint8_t grid_cell);
 
 #endif // VECMATH_H_

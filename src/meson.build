@@ -3,7 +3,7 @@ sources = c.stdout().strip().split('\n')
 
 e = executable('rouge_galaxy',sources,
       win_subsystem: 'console',
-      dependencies: [m_dep,sdl2_dep,sdl2_ttf_dep,sdl2_main_dep]
+      dependencies: [m_dep,raydep]
 )
 
 #remove main so that test can be an executable too
@@ -14,4 +14,4 @@ foreach item : sources
   endif
 endforeach
 
-this_dep = declare_dependency(dependencies: [m_dep,sdl2_dep,sdl2_ttf_dep], include_directories: inc,objects: e.extract_objects(sources_objs))
+this_dep = declare_dependency(dependencies: [m_dep,raydep], include_directories: inc,objects: e.extract_objects(sources_objs))
