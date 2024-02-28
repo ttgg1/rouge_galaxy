@@ -12,10 +12,15 @@
 
 * interface.c
 - +ncurces.h+ +-> REWRITE with SDL2_ttf+
-- draw char with color
+- +draw char with color+
 - draw array (with color)
 
 * Procedrual dungeon generation with WFC
+
+* ui.c
+- open textbox
+- select items
+- look like pokemon fight menu
 
 * enemy.c
 - handle fights with the player

@@ -2,18 +2,18 @@
 #define PLAYER_H_
 
 #include "entity.h"
+#include "utils.h"
 #include "vecMath.h"
-#include <SDL2/SDL.h>
+#include <raylib.h>
 
 typedef struct player {
   entity_t *e;
 } player_t;
 
 player_t *pl_createPlayer(ivec2_t pos);
-void pl_destroyPlayer(player_t *);
+void pl_destroyPlayer(player_t *p);
 
-
-// call after case SDL_KEYDOWN
-void pl_handleMovement(player_t *p, SDL_Event *e);
+// call after case KEYDOWN
+void pl_handleMovement(player_t *p, float delta);
 
 #endif // PLAYER_H_
