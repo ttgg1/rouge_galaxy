@@ -1,4 +1,5 @@
 #include "interface.h"
+#include <raylib.h>
 
 interface_t *in_create(uint8_t grid_w, uint8_t grid_h, float ptsize) {
   interface_t *res = malloc(sizeof(interface_t));
@@ -7,8 +8,13 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, float ptsize) {
   res->h = grid_h;
   res->ptsize = ptsize;
 
+  // create window
+  InitWindow(WIN_W, WIN_H, "Rouge Galaxy");
+  SetTargetFPS(240);
+
   // Open Font
   char *relPath;
+#define __LINUX__
 #ifdef __LINUX__
   relPath = "/../../assets/unifont-15.1.04.otf";
 #else
@@ -22,32 +28,18 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, float ptsize) {
   res->f = LoadFont(path);
 
   // get grid_cell
-  res->grid_cell = (uint8_t)res->f.baseSize;
-
-  // create window
-  InitWindow(WIN_W, WIN_H, "Rouge Galaxy");
+  res->grid_cell = (uint8_t)ceil(0.5f * (WIN_W / res->w + WIN_H / res->h));
 
   // init Grid
-  size_t nobjs = (res->w * res->h) + 1;
-
   res->grid = (int **)malloc(res->h * sizeof(int *));
 
   // init colormap
   res->colormap = (Color **)malloc(res->h * sizeof(Color *));
-
   for (int j = 0; j < res->h; ++j) {
     // init cols
     res->grid[j] = (int *)malloc(res->w * sizeof(int));
     res->colormap[j] = (Color *)malloc(res->w * sizeof(Color));
-
-    for (int i = 0; i < res->w; ++i) {
-      // init colormap to standard foreground color
-      res->colormap[i][j] = in_fg;
-    }
   }
-
-  // terminate String
-  res->grid[res->w][res->h] = (int)'\0';
 
   return res;
 }
@@ -111,17 +103,22 @@ void in_drawEntity(interface_t *in, entity_t *e) {
   in_drawAtColored(in, e->c, e->color, e->pos);
 }
 
-void in_drawPresent(interface_t *in) {
+void in_drawPresent(interface_t *in, Camera2D *cam) {
   BeginDrawing();
+  BeginMode2D(*cam);
   //---------------------------------------------------------------
   Vector2 pos = {0, 0};
   for (int j = 0; j < in->h; ++j) {
     for (int i = 0; i < in->w; ++i) {
       DrawTextCodepoint(in->f, in->grid[i][j], pos, in->ptsize,
                         in->colormap[i][j]);
+      pos.x += in->grid_cell;
     }
+    pos.y += in->grid_cell;
+    pos.x = 0;
   }
   //---------------------------------------------------------------
+  EndMode2D();
   EndDrawing();
 }
 

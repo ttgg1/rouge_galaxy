@@ -21,8 +21,7 @@ int cwdPathLenght(char *path) {
         return i;
       }
     }
-  } else {
-    debug_print("Failed to get cwd ! \n");
-    return -1;
   }
+  debug_print("Failed to get cwd ! \n");
+  return -1;
 }

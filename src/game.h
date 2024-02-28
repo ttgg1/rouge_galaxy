@@ -1,6 +1,8 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include <raylib.h>
+#include <raymath.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -11,6 +13,7 @@
 #include "player.h"
 #include "ui.h"
 #include "utils.h"
+#include "vecMath.h"
 
 typedef struct game {
   bool isRunning;
@@ -21,6 +24,10 @@ typedef struct game {
   list_t *active_entities;
 
   list_t *uiWindowList;
+  Camera2D *cam;
+
+  float delta;
+  int fps;
 } game_t;
 
 void gm_start(game_t *g);

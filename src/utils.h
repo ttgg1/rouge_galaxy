@@ -7,9 +7,32 @@
 #endif
 
 #include <limits.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+
+#define create2dArray(__w, __h, __type_t)                                      \
+  ({                                                                           \
+    type_t **__arr;                                                            \
+    do {                                                                       \
+      __arr = (__type_t **)malloc(__h * sizeof(__type_t *));                   \
+      for (int __i = 0; __i < __h; ++__i) {                                    \
+        __arr[__i] = malloc(__w * sizeof(__type_t));                           \
+      }                                                                        \
+    } while (0);                                                               \
+    __arr;                                                                     \
+  })
+
+#define free2dArray(__h, __arr)                                                \
+  ({                                                                           \
+    do {                                                                       \
+      for (int __i = 0; __i < __h; ++__i) {                                    \
+        free(__arr[__i]);                                                      \
+      }                                                                        \
+      free(__arr);                                                             \
+    } while (0);                                                               \
+  })
 
 #define debug_print(fmt, ...)                                                  \
   do {                                                                         \

@@ -13,6 +13,7 @@
 #include "entity.h"
 #include "utils.h"
 #include "vecMath.h"
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -44,7 +45,7 @@ void in_drawEntity(interface_t *in, entity_t *e);
 // maybe add support to draw codepoints ?
 
 // needs to be called AFTER draw calls
-void in_drawPresent(interface_t *in);
+void in_drawPresent(interface_t *in, Camera2D *cam);
 void in_clearScreen(interface_t *in);
 
 #endif // INTERFACE_H_
