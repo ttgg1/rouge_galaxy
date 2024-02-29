@@ -14,7 +14,7 @@
 
 #define create2dArray(__w, __h, __type_t)                                      \
   ({                                                                           \
-    type_t **__arr;                                                            \
+    __type_t **__arr;                                                            \
     do {                                                                       \
       __arr = (__type_t **)malloc(__h * sizeof(__type_t *));                   \
       for (int __i = 0; __i < __h; ++__i) {                                    \
