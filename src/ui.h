@@ -21,10 +21,10 @@ typedef enum ui_win_border {
 } ui_win_border_t;
 
 typedef struct ui_window {
-  uint16_t w;
-  uint16_t h;
+  uint16_t width;
+  uint16_t height;
   ivec2_t pos;
-  int **content;
+  char **content;
   Color **colormap;
 } ui_win_t;
 
