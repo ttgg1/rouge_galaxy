@@ -66,6 +66,9 @@ void gm_addUiWindow(ui_win_t *win, game_t *g) { li_push(g->uiWindowList, win); }
   odd grid_w and grid_h for centered player
 */
 game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
+
+  srand(time(NULL));
+
   game_t *g = malloc(sizeof(game_t));
   interface_t *inter;
 
@@ -83,6 +86,26 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
 
   // init map
   g->map = m_create();
+
+  static const bool tempCons[NUM_CONSTRAINTS * 4 * NUM_CONSTRAINTS] = 
+  {
+    true,false, false,true, true,false, false,true,
+    false,true, true,false, false,true, true,false
+  };
+  /*{
+    true,false,false,false,false, true,true,true,true,true, true,true,true,true,true, true,false,false,false,false,
+    true,true,false,false,false, false,true,true,true,true, false,true,true,true,true, true,true,false,false,false,
+    true,true,true,false,false, false,false,true,true,true, false,false,true,true,true, true,true,true,false,false,
+    true,true,true,true,false, false,false,false,true,true, false,false,false,true,true, true,true,true,true,false,
+    true,true,true,true,true, false,false,false,false,true, false,false,false,false,true, true,true,true,true,true
+  };*/  
+  memcpy(g->map->constraints, tempCons, sizeof tempCons);
+
+  static const uint32_t tempTiles[NUM_CONSTRAINTS] = {(uint32_t) '#', (uint32_t) '.'};//{(uint32_t) '1', (uint32_t) '2', (uint32_t) '3', (uint32_t) '4', (uint32_t) '5'};
+  memcpy(g->map->tileset, tempTiles, sizeof tempTiles);
+
+  m_setAt(g->map, 500, 500, (uint32_t)'T');
+  m_generateMap(g->map, -100, 100, -100, 100);
 
   // add Player to Entity list
   gm_addEntity(g->p->e, g);

@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "entity.h"
 #include "interface.h"

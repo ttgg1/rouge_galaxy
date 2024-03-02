@@ -6,6 +6,7 @@
 #include "game.h"
 #include "ui.h"
 #include "vecMath.h"
+#include "map.h"
 
 int main(int argc, char **argv) {
 
@@ -16,6 +17,7 @@ int main(int argc, char **argv) {
 
   gm_addEntity(&ent, game);
   gm_addEntity(&ent2, game);
+
   gm_start(game);
 
   gm_stop(game);
