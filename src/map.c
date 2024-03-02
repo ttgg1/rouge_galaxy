@@ -35,11 +35,6 @@ void qt_destroy(quadTree_t *t){
     free(t);
 }
 
-map_t* m_create()
-{
-	map_t* m;
-	m = (map_t*) malloc(sizeof(map_t));
-
 map_t *m_create() {
     map_t *m;
     m = (map_t *) malloc(sizeof(map_t));
@@ -69,19 +64,6 @@ void m_destroy(map_t* m)
 	free(m);
 }
 
-bool m_inBounds(map_t* m, int y, int x)
-{
-	printf("inBounds: y: %d, x: %d, h: %d | %d %d %d %d\n", y, x, m->height, -(1 << (m->height - 1)) + 1, (1 << (m->height - 1)),
-	       -(1 << (m->height - 1)) + 1, (1 << (m->height - 1)));
-
-	if (m->height == 0) {
-		return y == 0 && x == 0;
-	}
-
-	return y >= -(1 << (m->height - 1)) + 1
-	       && y <= (1 << (m->height - 1))
-	       && x >= -(1 << (m->height - 1)) + 1
-	       && x <= (1 << (m->height - 1));
 bool m_inBounds(int height, int y, int x) {
     if (height == 0) {
         return y == 0 && x == 0;
@@ -93,12 +75,6 @@ bool m_inBounds(int height, int y, int x) {
         && x <= (1 << (height - 1)); 
 }
 
-bool m_inBoundsNW(map_t* m, int y, int x)
-{
-	return y >= -(1 << (m->height - 1)) + 1
-	       && y <= 0
-	       && x >= -(1 << (m->height - 1)) + 1
-	       && x <= 0;
 bool m_inBoundsNW(int height, int y, int x) {
     return y >= -(1 << (height - 1)) + 1
         && y <= 0

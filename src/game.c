@@ -118,7 +118,7 @@ void gm_addUiWindow(ui_win_t *ui_window, game_t *game) {
 /*
   odd grid_w and grid_h for centered player
 */
-game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
+game_t *gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize) {
 
   srand(time(NULL));
 
@@ -185,18 +185,18 @@ void gm_updateGrid(game_t *game) {
   // clear grid
   // memset(g->in->grid, '.', g->in->w * g->in->h * sizeof(char));
 
-  /* int offsetY, offsetX; */
-  /* offsetY = g->in->h / 2; */
-  /* offsetX = g->in->w / 2; */
+  int offsetY, offsetX; 
+  offsetY = game->interface->height / 2; 
+  offsetX = game->interface->width / 2; 
 
   // handle map
 
-  for (int y = 0; y < g->in->h; y++) {
-    for (int x = 0; x < g->in->w; x++) {
+  for (int y = 0; y < game->interface->height; y++) {
+    for (int x = 0; x < game->interface->width; x++) {
       in_drawAtColored(
-        g->in,
-        m_getAt(g->map, y + g->p->e->pos.y - offsetY, x + g->p->e->pos.x - offsetX),
-        (SDL_Color){200, 200, 200, 255},
+        game->interface,
+        m_getAt(game->map, y + game->player->e->pos.y - offsetY, x + game->player->e->pos.x - offsetX),
+        (Color){200, 200, 200, 255},
         (ivec2_t){x,y}
       );
     }
