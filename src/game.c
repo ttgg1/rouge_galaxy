@@ -104,8 +104,8 @@ game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
   static const uint32_t tempTiles[NUM_CONSTRAINTS] = {(uint32_t) '#', (uint32_t) '.'};//{(uint32_t) '1', (uint32_t) '2', (uint32_t) '3', (uint32_t) '4', (uint32_t) '5'};
   memcpy(g->map->tileset, tempTiles, sizeof tempTiles);
 
-  m_setAt(g->map, 500, 500, (uint32_t)'T');
-  m_generateMap(g->map, -100, 100, -100, 100);
+  m_setAt(g->map, 1200, 1200, (uint32_t)'T');
+  m_generateMap(g->map, -1000, 1000, -1000, 1000);
 
   // add Player to Entity list
   gm_addEntity(g->p->e, g);

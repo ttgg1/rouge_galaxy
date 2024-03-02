@@ -117,7 +117,7 @@ void *li_pop(list_t *list) {
   }
   void *value = list->head->value;
   node_t *temp = list->head->next;
-  // li_destroyNode(list->head);
+  //li_destroyNode(list->head);
   list->head = temp;
   list->size--;
   return value;

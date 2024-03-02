@@ -350,7 +350,7 @@ void m_generateMap(map_t *m, int yStart, int yEnd, int xStart, int xEnd) {
     data->xEnd = xEnd;
     data->tilesLeft = (yEnd - yStart) * (xEnd - xStart);
 
-    
+    data->updates = li_emptyList();
     
 
     quadTree_t *tree, *lowestTree;
@@ -399,116 +399,127 @@ void m_generateMap(map_t *m, int yStart, int yEnd, int xStart, int xEnd) {
                 collapsed--;
             }
         }
-        m_propagateChanges(m, data, posY, posX);
+        li_push(data->updates, &(ivec2_t){posX, posY});
+        m_propagateChanges(m, data);
     }
 
+    li_destroy(data->updates);
     free(data);
 }
 
 
-void m_propagateChanges(map_t *m, wfcdata_t *data, int yStart, int xStart) {
-    //printf("propagating changes from %d, %d ", yStart, xStart);
-    if (yStart < data->yStart || yStart >= data->yEnd || xStart < data->xStart || xStart >= data->xEnd) {
-        // return if starting tile is out-of-bounds
-        //printf("out of bounds!\n");
-        return;
-    }
-    //printf("\n");
-
-    bool changes[n_offsets];
-    for (int i = 0; i < n_offsets; i++) {
-        changes[i] = false;
-    }
-
-    // offsets for translating local tree coordinates
-    int offsetY, offsetX, h;
-    offsetY = 0;
-    offsetX = 0;
-    h = m->height;
-
-    quadTree_t *tree = m_getContainingTree(m, NULL, yStart, xStart, &h, &offsetY, &offsetX);
-
-    // iterate over adjacent neighbours (N,E,S,W) of starting tile
+void m_propagateChanges(map_t *m, wfcdata_t *data) {
+    int yStart, xStart;
     
-    int posY, posX, idxSuperpos;
-    quadTree_t *nTree;
-    for (int direction = 0; direction < n_offsets; direction++) {
-        posY = yStart + OFFSETS[direction*2];
-        posX = xStart + OFFSETS[direction*2+1];
+    int offsetY, offsetX, h;
+    bool changes[n_offsets];
+    while (data->updates->head != NULL) {
+        ivec2_t *pos = (ivec2_t *)li_pop(data->updates);
+        yStart = pos->y;
+        xStart = pos->x;
+        //printf("propagating changes from %d, %d ", yStart, xStart);
+        if (yStart < data->yStart || yStart >= data->yEnd || xStart < data->xStart || xStart >= data->xEnd) {
+            // return if starting tile is out-of-bounds
+            //printf("out of bounds!\n");
+            return;
+        }
+        //printf("\n");
 
+        
+        for (int i = 0; i < n_offsets; i++) {
+            changes[i] = false;
+        }
+
+        // offsets for translating local tree coordinates
+        
         offsetY = 0;
         offsetX = 0;
         h = m->height;
 
-        nTree = m_getContainingTree(m, NULL, posY, posX, &h, &offsetY, &offsetX);
+        quadTree_t *tree = m_getContainingTree(m, NULL, yStart, xStart, &h, &offsetY, &offsetX);
 
-        //skip collapsed neighbour
-        if (nTree->hasCollapsed) {
-            continue;
-        }
-
-        // skip out-of-bounds
-        if (posY < data->yStart || posY >= data->yEnd || posX < data->xStart || posX >= data->xEnd) {
-            continue;
-        }
-
-        // determine possible tiles for neighbour 
-
-        bool superpos[NUM_CONSTRAINTS] = {false};
+        // iterate over adjacent neighbours (N,E,S,W) of starting tile
         
-        for (int idx_cons = 0; idx_cons < NUM_CONSTRAINTS; idx_cons++) {
-            
-            if (!tree->superposition[idx_cons]) {
+        int posY, posX, idxSuperpos;
+        quadTree_t *nTree;
+        for (int direction = 0; direction < n_offsets; direction++) {
+            posY = yStart + OFFSETS[direction*2];
+            posX = xStart + OFFSETS[direction*2+1];
+
+            offsetY = 0;
+            offsetX = 0;
+            h = m->height;
+
+            nTree = m_getContainingTree(m, NULL, posY, posX, &h, &offsetY, &offsetX);
+
+            //skip collapsed neighbour
+            if (nTree->hasCollapsed) {
                 continue;
             }
 
-            // if tile is in the starting tiles allowed tileset, add its constraintset to possible tiles for neighbour
-            for (int idx = 0; idx < NUM_CONSTRAINTS; idx++) {
+            // skip out-of-bounds
+            if (posY < data->yStart || posY >= data->yEnd || posX < data->xStart || posX >= data->xEnd) {
+                continue;
+            }
+
+            // determine possible tiles for neighbour 
+
+            bool superpos[NUM_CONSTRAINTS] = {false};
+            
+            for (int idx_cons = 0; idx_cons < NUM_CONSTRAINTS; idx_cons++) {
                 
-                /*
-                if (m->constraints[idx_cons][direction][idx]) {
-                    superpos[idx] = true;
+                if (!tree->superposition[idx_cons]) {
+                    continue;
                 }
-                */
 
-                if (m->constraints[idx_cons * NUM_CONSTRAINTS * n_offsets + direction * NUM_CONSTRAINTS + idx]) {
-                    superpos[idx] = true;
+                // if tile is in the starting tiles allowed tileset, add its constraintset to possible tiles for neighbour
+                for (int idx = 0; idx < NUM_CONSTRAINTS; idx++) {
+                    
+                    /*
+                    if (m->constraints[idx_cons][direction][idx]) {
+                        superpos[idx] = true;
+                    }
+                    */
+
+                    if (m->constraints[idx_cons * NUM_CONSTRAINTS * n_offsets + direction * NUM_CONSTRAINTS + idx]) {
+                        superpos[idx] = true;
+                    }
                 }
+            }
+
+            // update allowed tiles for neighbour
+            idxSuperpos = -1;
+
+            for (int i = 0; i < NUM_CONSTRAINTS; i++) {
+                if (nTree->superposition[i]) {
+
+                    if (superpos[i]) {
+                        idxSuperpos = i;
+                    }else {
+                        //printf("%d, %d removed superpos %d\n", posY, posX, i);
+                        nTree->superposition[i] = false;
+                        nTree->numSuperpos--;
+                        // mark neighbour if tile is removed from neighbours tileset
+                        changes[direction] = true;
+                    }
+                }
+            }
+            // if only one possible tile for neighbour remains, collapse tile
+            if (nTree->numSuperpos == 1 && !nTree->hasCollapsed) {
+                nTree->hasCollapsed = true;
+                nTree->value = m->tileset[idxSuperpos];
+                data->tilesLeft--;
+                //printf("%d %d only one remaining, collapsed to %c (%d), remaining: %d\n", posY, posX, (char)nTree->value, idxSuperpos, data->tilesLeft);
             }
         }
 
-        // update allowed tiles for neighbour
-        idxSuperpos = -1;
-
-        for (int i = 0; i < NUM_CONSTRAINTS; i++) {
-            if (nTree->superposition[i]) {
-
-                if (superpos[i]) {
-                    idxSuperpos = i;
-                }else {
-                    //printf("%d, %d removed superpos %d\n", posY, posX, i);
-                    nTree->superposition[i] = false;
-                    nTree->numSuperpos--;
-                    // mark neighbour if tile is removed from neighbours tileset
-                    changes[direction] = true;
-                }
+        // continue propagating changes to updated neighbouring tiles
+        for (int i = 0; i < n_offsets; i++) {
+            //printf("(%d) propagating changes to %d, %d: %d\n", i, yStart + OFFSETS[i*2], xStart + OFFSETS[i*2+1], changes[i]);
+            if (changes[i]) {
+                li_push(data->updates, &(ivec2_t){xStart + OFFSETS[i*2+1], yStart + OFFSETS[i*2]});
             }
         }
-        // if only one possible tile for neighbour remains, collapse tile
-        if (nTree->numSuperpos == 1 && !nTree->hasCollapsed) {
-            nTree->hasCollapsed = true;
-            nTree->value = m->tileset[idxSuperpos];
-            data->tilesLeft--;
-            //printf("%d %d only one remaining, collapsed to %c (%d), remaining: %d\n", posY, posX, (char)nTree->value, idxSuperpos, data->tilesLeft);
-        }
+        //printf("\n");
     }
-
-    // continue propagating changes to updated neighbouring tiles
-    for (int i = 0; i < n_offsets; i++) {
-        //printf("(%d) propagating changes to %d, %d: %d\n", i, yStart + OFFSETS[i*2], xStart + OFFSETS[i*2+1], changes[i]);
-        if (changes[i]) {
-            m_propagateChanges(m, data, yStart + OFFSETS[i*2], xStart + OFFSETS[i*2+1]);
-        }
-    }
-    //printf("\n");
 }

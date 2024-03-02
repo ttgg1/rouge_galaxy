@@ -8,7 +8,8 @@
 
 #include <stdlib.h>
 #include <time.h>
-
+#include "list.h"
+#include "vecMath.h"
 
 #define NUM_CONSTRAINTS 2
 #define NUM_TILES 2
@@ -39,6 +40,7 @@ typedef struct wfcdata{
     int32_t xStart;
     int32_t xEnd;
     int tilesLeft;
+    list_t *updates;
 } wfcdata_t;
 
 
@@ -66,6 +68,6 @@ void m_setAt(map_t *m, int y, int x, uint32_t c);
 uint32_t m_getAt(map_t *m, int y, int x);
 
 void m_generateMap(map_t *m, int yStart, int yEnd, int xStart, int xEnd);
-void m_propagateChanges(map_t *m, wfcdata_t *data, int yStart, int xStart);
+void m_propagateChanges(map_t *m, wfcdata_t *data);
 
 #endif // MAP_H
