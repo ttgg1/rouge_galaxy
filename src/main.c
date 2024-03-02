@@ -5,6 +5,7 @@
 #include "game.h"
 #include "ui.h"
 #include "vecMath.h"
+#include "map.h"
 
 int main(int argc, char **argv) {
   game_t *game = gm_init(30, 30, 30);

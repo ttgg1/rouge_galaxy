@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "entity.h"
 #include "interface.h"
@@ -13,16 +15,16 @@
 #include "player.h"
 #include "ui.h"
 #include "utils.h"
+#include "map.h"
 #include "vecMath.h"
 
 typedef struct game {
 	bool isRunning;
 	interface_t* interface;
 	player_t* player;
-
 	list_t* entity_list;
 	list_t* active_entities;
-
+  map_t *map;
 	list_t* uiWindowList;
 	Camera2D* mainCamera;
 

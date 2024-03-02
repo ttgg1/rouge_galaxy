@@ -118,8 +118,11 @@ void gm_addUiWindow(ui_win_t *ui_window, game_t *game) {
 /*
   odd grid_w and grid_h for centered player
 */
-game_t *gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize) {
-  game_t *g = (game_t *)malloc(sizeof(game_t));
+game_t *gm_init(uint8_t grid_w, uint8_t grid_h, uint8_t ptsize) {
+
+  srand(time(NULL));
+
+  game_t *g = malloc(sizeof(game_t));
   interface_t *inter;
 
   // create text interface and store it in game struct
@@ -140,6 +143,29 @@ game_t *gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize) {
   g->entity_list = li_emptyList();
   g->active_entities = li_emptyList();
   g->uiWindowList = li_emptyList();
+
+  // init map
+  g->map = m_create();
+
+  static const bool tempCons[NUM_CONSTRAINTS * 4 * NUM_CONSTRAINTS] = 
+  {
+    true,false, false,true, true,false, false,true,
+    false,true, true,false, false,true, true,false
+  };
+  /*{
+    true,false,false,false,false, true,true,true,true,true, true,true,true,true,true, true,false,false,false,false,
+    true,true,false,false,false, false,true,true,true,true, false,true,true,true,true, true,true,false,false,false,
+    true,true,true,false,false, false,false,true,true,true, false,false,true,true,true, true,true,true,false,false,
+    true,true,true,true,false, false,false,false,true,true, false,false,false,true,true, true,true,true,true,false,
+    true,true,true,true,true, false,false,false,false,true, false,false,false,false,true, true,true,true,true,true
+  };*/  
+  memcpy(g->map->constraints, tempCons, sizeof tempCons);
+
+  static const uint32_t tempTiles[NUM_CONSTRAINTS] = {(uint32_t) '#', (uint32_t) '.'};//{(uint32_t) '1', (uint32_t) '2', (uint32_t) '3', (uint32_t) '4', (uint32_t) '5'};
+  memcpy(g->map->tileset, tempTiles, sizeof tempTiles);
+
+  m_setAt(g->map, 1200, 1200, (uint32_t)'T');
+  m_generateMap(g->map, -1000, 1000, -1000, 1000);
 
   // add Player to Entity list
   gm_addEntity(g->player->e, g);
@@ -165,7 +191,16 @@ void gm_updateGrid(game_t *game) {
 
   // handle map
 
-  // TODO
+  for (int y = 0; y < g->in->h; y++) {
+    for (int x = 0; x < g->in->w; x++) {
+      in_drawAtColored(
+        g->in,
+        m_getAt(g->map, y + g->p->e->pos.y - offsetY, x + g->p->e->pos.x - offsetX),
+        (SDL_Color){200, 200, 200, 255},
+        (ivec2_t){x,y}
+      );
+    }
+  }
 
   // handle entities
   // TODO: refactor to use active_entities list
