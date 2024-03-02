@@ -18,7 +18,7 @@
     do {                                                                       \
       __arr = (__type_t **)malloc(__h * sizeof(__type_t *));                   \
       for (int __i = 0; __i < __h; ++__i) {                                    \
-        __arr[__i] = malloc(__w * sizeof(__type_t));                           \
+        __arr[__i] = (__type_t *)malloc(__w * sizeof(__type_t));               \
       }                                                                        \
     } while (0);                                                               \
     __arr;                                                                     \

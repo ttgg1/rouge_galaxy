@@ -16,7 +16,8 @@
 - draw array (with color)
 
 * Procedrual dungeon generation with WFC
-
+* list.c
+- on destroy functin pointer, which is called on destroy on every object to free
 * ui.c
 - open textbox
 - select items

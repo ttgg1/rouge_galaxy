@@ -3,6 +3,7 @@
 
 #include "entity.h"
 #include "game.h"
+#include "interface.h"
 #include "ui.h"
 #include "vecMath.h"
 
@@ -15,12 +16,13 @@ int main(int argc, char **argv) {
       en_create(2, (ivec2_t){11, 10}, (int)'B', (Color){128, 128, 0, 255});
 
   ui_win_t *testWindow = ui_createWindow(
-      (ivec2_t){0, 10}, 20, 10, "Dies ist ein Test !\n", BORDER_SOLID,
-      (Color){0, 50, 255, 255}, (Color){0, 0, 255, 255});
+      (ivec2_t){5, 20}, 15, 10,
+      "Dies ist ein Test !\n Dies ist ebenfalls ein Test und das auch !!!",
+      BORDER_PIPE, BLUE, PURPLE);
 
   gm_addEntity(entity1, game);
   gm_addEntity(entity2, game);
-  gm_addUiWindow(testWindow, game);
+  in_addUiWindow(testWindow, game->interface);
   gm_start(game);
 
   gm_stop(game);

@@ -32,7 +32,7 @@ int cwdPathLenght(char *path) {
 void ut_print2dArray(char **array, unsigned int width, unsigned int height) {
   for (unsigned int j = 0; j < height; ++j) {
     for (unsigned int i = 0; i < width; ++i) {
-      printf("%c ", array[j][i]);
+      printf("%d ", (int)array[j][i]);
     }
     printf("\n");
   }
