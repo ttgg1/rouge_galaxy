@@ -128,20 +128,23 @@ void in_drawEntity(interface_t *interface, entity_t *entity) {
 }
 
 static void drawUiWindow(ui_win_t *win, interface_t *in) {
-  Vector2 drawPosition = {0.0f, 0.0f};
-  // TODO: figure out spacing
-  // draw background
-  DrawRectangle(0, 0, win->width * in->font.baseSize * 0.92f,
-                win->height * in->textSize, in_bg);
+  /* Vector2 drawPosition = {0.0f, 0.0f}; */
+  /* // TODO: figure out spacing */
+  /* // draw background */
+  /* DrawRectangle(0, 0, win->width * in->font.baseSize * 0.92f, */
+  /*               win->height * in->textSize, in_bg); */
 
-  for (int j = 0; j < win->height; ++j) {
-    drawPosition.y = (float)j * in->textSize;
-    DrawTextCodepoints(in->font, win->windowBorder[j], win->width, drawPosition,
-                       (float)in->textSize, in->font.glyphPadding,
-                       win->borderColor);
-    DrawTextEx(in->font, win->text[j], drawPosition, in->textSize, 1.0f,
-               win->textColor);
-  }
+  /* for (int j = 0; j < win->height; ++j) { */
+  /*   drawPosition.y = (float)j * in->textSize; */
+  /*   DrawTextCodepoints(in->font, win->windowBorder[j], win->width,
+   * drawPosition, */
+  /*                      (float)in->textSize, in->font.glyphPadding, */
+  /*                      win->borderColor); */
+  /*   DrawTextEx(in->font, win->text[j], drawPosition, in->textSize, 1.0f, */
+  /*              win->textColor); */
+  /* } */
+  if (win->isShown)
+    DrawTexture(*win->WindowTexture, win->pos.x, win->pos.y, WHITE);
 }
 static void drawUi(interface_t *interface) {
   node_t *curr = interface->uiWindowList->head;

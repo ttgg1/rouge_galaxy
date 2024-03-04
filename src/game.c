@@ -72,7 +72,7 @@ static void draw(game_t *game) {
 
 static void handleEvents(game_t *game) {
   // printf("delta: %f, FPS: %d\n", game->deltaTime, game->fps);
-  pl_handleMovement(game->player, game->deltaTime);
+  pl_handleMovement(game->player);
   checkPlayerBounds(game);
 
   // call eventhooks

@@ -1,10 +1,25 @@
 #include "ui.h"
 
-static void drawBorders(ui_win_t *win, ui_win_border_t borderStyle) {
+static void calcGlyphWidth(ui_win_t *win) {
+  // calculate width of one border Glyth
+  if (win->borderStyle > 1) {
+    int glyphIndex =
+        GetGlyphIndex(*win->font, win->borderStyle ? (int)196 : (int)205);
+    win->glyphWidth =
+        (float)win->font->recs[glyphIndex].width * win->scaleFactor;
+  } else {
+
+    int glyphIndex = GetGlyphIndex(*win->font, (int)win->borderStyle);
+    win->glyphWidth =
+        (float)win->font->recs[glyphIndex].width * win->scaleFactor;
+  }
+}
+
+static void drawBorders(ui_win_t *win, Image *backgroundImage) {
   // set Borders
   int borderChar = 0;
 
-  switch (borderStyle) {
+  switch (win->borderStyle) {
   case BORDER_SOLID:
     borderChar = (int)BORDER_SOLID;
     break;
@@ -31,83 +46,170 @@ static void drawBorders(ui_win_t *win, ui_win_border_t borderStyle) {
     break;
   }
 
+  int topBottom[win->width];
+  int sideChar = win->borderStyle ? (int)179 : (int)186;
+
   if (borderChar > 1) {
     // set top and bottom
     for (int i = 0; i < win->width; ++i) {
-      win->windowBorder[0][i] = (int)borderChar;
-      win->windowBorder[win->height - 1][i] = (int)borderChar;
+      topBottom[i] = (int)borderChar;
     }
 
     // set sides
-    for (int i = 0; i < win->height; ++i) {
-      win->windowBorder[i][0] = (int)borderChar;
-      win->windowBorder[i][win->width - 1] = (int)borderChar;
-    }
+    sideChar = (int)borderChar;
+
   } else { // handle constructed borders
     // set top and bottom
     for (int i = 1; i < win->width - 1; ++i) {
       // sets corresponding char -> borderStyle ? BORDER_LINE : BORDER_PIPE
-      win->windowBorder[0][i] = borderStyle ? (int)196 : (int)205;
-      win->windowBorder[win->height - 1][i] = borderStyle ? (int)196 : (int)205;
+      topBottom[i] = win->borderStyle ? (int)196 : (int)205;
     }
 
     // set sides
-    for (int i = 1; i < win->height - 1; ++i) {
-      win->windowBorder[i][0] = borderStyle ? (int)179 : (int)186;
-      win->windowBorder[i][win->width - 1] = borderStyle ? (int)179 : (int)186;
-    }
+    sideChar = win->borderStyle ? (int)179 : (int)186;
 
     // set corners
-    // top-left
-    win->windowBorder[0][0] = borderStyle ? (int)218 : (int)201;
-    // top-right
-    win->windowBorder[0][win->width - 1] = borderStyle ? (int)191 : (int)187;
-    // bottom-left
-    win->windowBorder[win->height - 1][0] = borderStyle ? (int)192 : (int)200;
-    // bottom-right
-    win->windowBorder[win->height - 1][win->width - 1] =
-        borderStyle ? (int)217 : (int)188;
+    topBottom[0] = win->borderStyle ? (int)218 : (int)201;
+    topBottom[win->width - 1] = win->borderStyle ? (int)191 : (int)187;
   }
+
+  // Codepoints -> UTF-8 text
+  char *topBottom_str = LoadUTF8(topBottom, win->width);
+
+  int sideChar_len = 0;
+  char *sideChar_str = CodepointToUTF8(sideChar, &sideChar_len);
+
+  // generate Image
+  Image topBottomImage = ImageTextEx(*win->font, topBottom_str, win->textSize,
+                                     win->borderSpacing, win->borderColor);
+
+  Image sideCharImage = ImageTextEx(*win->font, sideChar_str, win->textSize,
+                                    win->borderSpacing, win->borderColor);
+  // top border
+  ImageDraw(backgroundImage, topBottomImage,
+            (Rectangle){0, 0, (float)topBottomImage.width,
+                        (float)topBottomImage.height},
+            (Rectangle){0, 0, (float)backgroundImage->width,
+                        (float)topBottomImage.height},
+            WHITE);
+  // now bottom border
+  ImageFlipVertical(&topBottomImage);
+
+  float ypos = (float)(backgroundImage->height - topBottomImage.height);
+
+  ImageDraw(backgroundImage, topBottomImage,
+            (Rectangle){0, 0, (float)topBottomImage.width,
+                        (float)topBottomImage.height},
+            (Rectangle){0, ypos, (float)backgroundImage->width,
+                        (float)topBottomImage.height},
+            WHITE);
+
+  float xpos = (float)(backgroundImage->width - sideCharImage.width);
+  for (int i = 0; i < win->height - 2; ++i) {
+
+    ImageDraw(
+        backgroundImage, sideCharImage,
+        (Rectangle){0, 0, (float)sideCharImage.width,
+                    (float)sideCharImage.height},
+        (Rectangle){xpos,
+                    (float)(topBottomImage.height + i * sideCharImage.height),
+                    (float)sideCharImage.width, (float)(sideCharImage.height)},
+        WHITE);
+    ImageDraw(backgroundImage, sideCharImage,
+              (Rectangle){0, 0, (float)sideCharImage.width,
+                          (float)sideCharImage.height},
+              (Rectangle){
+                  0, (float)(topBottomImage.height + i * sideCharImage.height),
+                  (float)sideCharImage.width, (float)(sideCharImage.height)},
+              WHITE);
+  }
+  UnloadImage(topBottomImage);
+  UnloadImage(sideCharImage);
+
+  UnloadUTF8(topBottom_str);
 }
 
-static void writeText(ui_win_t *win, char *text) {
-  const int text_len = (int)strlen(text);
+// From:
+// https://stackoverflow.com/questions/122616/how-do-i-trim-leading-trailing-whitespace-in-a-standard-way
+// Note: This function returns a pointer to a substring of the original string.
+// If the given string was allocated dynamically, the caller must not overwrite
+// that pointer with the returned value, since the original pointer must be
+// deallocated using the same allocator with which it was allocated.  The return
+// value must NOT be deallocated using free() etc.
+static char *trimwhitespace(char *str) {
+  char *end;
+
+  // Trim leading space
+  while (isspace((unsigned char)*str))
+    str++;
+
+  if (*str == 0) // All spaces?
+    return str;
+
+  // Trim trailing space
+  end = str + strlen(str) - 1;
+  while (end > str && isspace((unsigned char)*end))
+    end--;
+
+  // Write new null terminator character
+  end[1] = '\0';
+
+  return str;
+}
+
+static void writeText(ui_win_t *win, Image *backgroundImage) {
+  const int text_len = (int)strlen(win->text);
 
   // check if text fits in window
   if (text_len >
-      (win->width + 1 + INNER_PADDING) * (win->height + 1 + INNER_PADDING)) {
+      (win->width - 2 * INNER_PADDING) * (win->height - 2 * INNER_PADDING)) {
     debug_print("Text doesnt fit inside ui-window !\n");
-    return;
   }
 
-  // draw text wrapped
-  int curr_y = INNER_PADDING;
-  int curr_x = INNER_PADDING;
+  int wraps = (int)text_len / win->width + 1;
 
-  for (int i = 0; i < text_len; ++i) {
-    if (text[i] == '\n') {
-      ++curr_y;
-      curr_x = INNER_PADDING;
-      ++i;
-      continue;
+  int paddedWidth = win->width - INNER_PADDING;
+  int paddedHeight = win->height - INNER_PADDING;
+
+  Image textCanvas =
+      GenImageColor((int)(floor(paddedWidth * win->glyphWidth)),
+                    (int)(floor(paddedHeight * win->glyphWidth)), BLANK);
+
+  if (wraps > 0) {
+    char *lines[wraps];
+    Vector2 pos = {0., 0.};
+    // each line of text
+    for (int i = 0; i < wraps; ++i) {
+      lines[i] = TextSubtext(win->text, i * paddedWidth, paddedWidth);
+
+      // remove whitespaces
+      char *editedLine = trimwhitespace(lines[i]);
+
+      ImageDrawTextEx(&textCanvas, *win->font, editedLine, pos, win->textSize,
+                      win->textSpacing, win->textColor);
+      pos.y += (float)(win->textSize + win->textSize / 2);
     }
-
-    win->text[curr_y][curr_x] = text[i];
-
-    // line wrap
-    if ((curr_x + INNER_PADDING + 1 > win->width && text[i] == ' ') ||
-        curr_x > win->width - 2) {
-      ++curr_y;
-      curr_x = INNER_PADDING;
-    } else {
-      ++curr_x;
-    }
+  } else {
+    ImageDrawTextEx(&textCanvas, *win->font, win->text, (Vector2){0., 0.},
+                    win->textSize, win->textSpacing, win->textColor);
   }
+
+  ImageDraw(
+      backgroundImage, textCanvas,
+      (Rectangle){0., 0., (float)textCanvas.width, (float)textCanvas.height},
+      (Rectangle){INNER_PADDING * win->glyphWidth,
+                  INNER_PADDING * win->glyphWidth, (float)textCanvas.width,
+                  (float)textCanvas.height},
+      WHITE);
+
+  UnloadImage(textCanvas);
 }
 
 ui_win_t *ui_createWindow(ivec2_t pos, uint16_t width, uint16_t height,
-                          char *text, ui_win_border_t borderStyle,
-                          Color textColor, Color borderColor) {
+                          char *text, float textSize,
+                          ui_win_border_t borderStyle, Color textColor,
+                          Color borderColor, Color backgroundColor,
+                          Font *font) {
   ui_win_t *win = (ui_win_t *)malloc(sizeof(ui_win_t));
 
   win->width = width;
@@ -115,65 +217,63 @@ ui_win_t *ui_createWindow(ivec2_t pos, uint16_t width, uint16_t height,
   win->pos = pos;
   win->textColor = textColor;
   win->borderColor = borderColor;
+  win->backgroundColor = backgroundColor;
+  win->borderStyle = borderStyle;
+  win->text = text;
+  win->textSize = textSize;
+  win->font = font;
+  win->scaleFactor = (float)(win->textSize / win->font->baseSize);
+  win->textSpacing = 1.0f * win->scaleFactor;
+  win->borderSpacing = 0.0f * win->scaleFactor;
 
-  win->windowBorder = (int **)create2dArray((win->width + 1), win->height, int);
-  win->text = (char **)create2dArray((win->width + 1), win->height, char);
+  calcGlyphWidth(win);
 
-  // set content
-  for (int j = 0; j < win->height; ++j) {
-    for (int i = 0; i < win->width; ++i) {
-      win->windowBorder[j][i] = (int)' ';
-      win->text[j][i] = (char)' ';
-    }
-    // terminate String
-    win->windowBorder[j][win->width] = '\0';
-    win->text[j][win->width] = '\0';
-  }
-
-  writeText(win, text);
-
-  drawBorders(win, borderStyle);
+  ui_generateWindowTexture(win);
 
   return win;
 }
 
+void ui_generateWindowTexture(ui_win_t *win) {
+  // generate Window and text image
+
+  Image backgroundImage =
+      GenImageColor((int)(win->width * win->glyphWidth),
+                    (int)(win->height * win->textSize), win->backgroundColor);
+
+  drawBorders(win, &backgroundImage);
+
+  writeText(win, &backgroundImage);
+
+  // generate Texture2D
+  win->WindowTexture = (Texture2D *)malloc(sizeof(Texture2D));
+  *win->WindowTexture = LoadTextureFromImage(backgroundImage);
+
+  UnloadImage(backgroundImage);
+}
+
 void ui_clearWindowText(ui_win_t *win) {
-  // set Color of entire text
-  int curr_y = 1 + INNER_PADDING;
-  int curr_x = 1 + INNER_PADDING;
-
-  int max_index =
-      (win->width - 1 - INNER_PADDING) * (win->height - 1 - INNER_PADDING);
-
-  for (int i = 0; i < max_index; ++i) {
-    win->text[curr_y][curr_x] = (int)' ';
-
-    // line wrap
-    if (curr_x + 1 + INNER_PADDING == win->width) {
-      ++curr_y;
-      curr_x = 1 + INNER_PADDING;
-    } else {
-      ++curr_x;
-    }
-  }
+  win->text[0] = (char)'\0';
+  ui_generateWindowTexture(win);
 }
 
 void ui_updateWindowText(ui_win_t *win, char *text) {
-  ui_clearWindowText(win);
-  writeText(win, text);
+  win->text = text;
+  ui_generateWindowTexture(win);
 }
 
 void ui_updateWindowTextColor(ui_win_t *win, Color textColor) {
   win->textColor = textColor;
+  ui_generateWindowTexture(win);
 }
 
 void ui_updateWindowTextAndColor(ui_win_t *win, char *text, Color textColor) {
-  ui_clearWindowText(win);
-  writeText(win, text);
   win->textColor = textColor;
+  win->text = text;
+  ui_generateWindowTexture(win);
 }
 
 void ui_destroyWindow(ui_win_t *win) {
-  free2dArray(win->height, win->windowBorder);
+  UnloadTexture(*win->WindowTexture);
+  free(win->WindowTexture);
   free(win);
 }
