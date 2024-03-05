@@ -12,24 +12,24 @@ static void updateCamera(game_t *game);
 static void checkPlayerBounds(game_t *game);
 
 static void checkPlayerBounds(game_t *game) {
-  ivec2_t plPos = game->player->e->pos;
+  ivec2_t *plPos = &game->player->e->pos;
   int grid_w = game->interface->width;
   int grid_h = game->interface->height;
 
-  if (plPos.x > grid_w) {
-    plPos.x = (int16_t)grid_w;
+  if (plPos->x >= grid_w - 1) {
+    plPos->x = (int16_t)grid_w - 1;
   }
 
-  if (plPos.y > grid_h) {
-    plPos.y = (int16_t)grid_h;
+  if (plPos->y >= grid_h) {
+    plPos->y = (int16_t)grid_h - 1;
   }
 
-  if (plPos.x < 0) {
-    plPos.x = 0;
+  if (plPos->x < 0) {
+    plPos->x = 0;
   }
 
-  if (plPos.y < 0) {
-    plPos.y = 0;
+  if (plPos->y < 0) {
+    plPos->y = 0;
   }
 }
 
@@ -117,6 +117,7 @@ void gm_stop(game_t *game) {
 
 void gm_addEntity(entity_t *entity, game_t *game) {
   li_push(game->entity_list, entity);
+  ++num_entities;
 }
 
 /*
@@ -153,21 +154,27 @@ game_t *gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize) {
   // init map
   g->map = m_create();
 
-  static const bool tempCons[NUM_CONSTRAINTS * 4 * NUM_CONSTRAINTS] = 
-  {
-    true,false, false,true, true,false, false,true,
-    false,true, true,false, false,true, true,false
-  };
+  static const bool tempCons[NUM_CONSTRAINTS * 4 * NUM_CONSTRAINTS] = {
+      true,  false, false, true,  true,  false, false, true,
+      false, true,  true,  false, false, true,  true,  false};
   /*{
-    true,false,false,false,false, true,true,true,true,true, true,true,true,true,true, true,false,false,false,false,
-    true,true,false,false,false, false,true,true,true,true, false,true,true,true,true, true,true,false,false,false,
-    true,true,true,false,false, false,false,true,true,true, false,false,true,true,true, true,true,true,false,false,
-    true,true,true,true,false, false,false,false,true,true, false,false,false,true,true, true,true,true,true,false,
-    true,true,true,true,true, false,false,false,false,true, false,false,false,false,true, true,true,true,true,true
-  };*/  
+    true,false,false,false,false, true,true,true,true,true,
+  true,true,true,true,true, true,false,false,false,false,
+    true,true,false,false,false, false,true,true,true,true,
+  false,true,true,true,true, true,true,false,false,false,
+    true,true,true,false,false, false,false,true,true,true,
+  false,false,true,true,true, true,true,true,false,false,
+    true,true,true,true,false, false,false,false,true,true,
+  false,false,false,true,true, true,true,true,true,false,
+    true,true,true,true,true, false,false,false,false,true,
+  false,false,false,false,true, true,true,true,true,true
+  };*/
   memcpy(g->map->constraints, tempCons, sizeof tempCons);
 
-  static const uint32_t tempTiles[NUM_CONSTRAINTS] = {(uint32_t) '#', (uint32_t) '.'};//{(uint32_t) '1', (uint32_t) '2', (uint32_t) '3', (uint32_t) '4', (uint32_t) '5'};
+  static const uint32_t tempTiles[NUM_CONSTRAINTS] = {
+      (uint32_t)'#',
+      (uint32_t)'.'}; //{(uint32_t) '1', (uint32_t) '2', (uint32_t) '3',
+                      //(uint32_t) '4', (uint32_t) '5'};
   memcpy(g->map->tileset, tempTiles, sizeof tempTiles);
 
   m_setAt(g->map, 1200, 1200, (uint32_t)'T');
@@ -191,20 +198,18 @@ void gm_updateGrid(game_t *game) {
   // clear grid
   // memset(g->in->grid, '.', g->in->w * g->in->h * sizeof(char));
 
-  int offsetY, offsetX; 
-  offsetY = game->interface->height / 2; 
-  offsetX = game->interface->width / 2; 
+  int offsetY, offsetX;
+  offsetY = game->interface->height / 2;
+  offsetX = game->interface->width / 2;
 
   // handle map
 
   for (int y = 0; y < game->interface->height; y++) {
     for (int x = 0; x < game->interface->width; x++) {
-      in_drawAtColored(
-        game->interface,
-        m_getAt(game->map, y + game->player->e->pos.y - offsetY, x + game->player->e->pos.x - offsetX),
-        (Color){200, 200, 200, 255},
-        (ivec2_t){x,y}
-      );
+      in_drawAtColored(game->interface,
+                       m_getAt(game->map, y + game->player->e->pos.y - offsetY,
+                               x + game->player->e->pos.x - offsetX),
+                       (Color){200, 200, 200, 255}, (ivec2_t){x, y});
     }
   }
 
