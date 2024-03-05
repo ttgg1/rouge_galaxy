@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "entity.h"
 #include "interface.h"
@@ -13,6 +15,7 @@
 #include "player.h"
 #include "ui.h"
 #include "utils.h"
+#include "map.h"
 #include "vecMath.h"
 
 typedef struct game {
@@ -23,7 +26,9 @@ typedef struct game {
   list_t *entity_list;
   list_t *active_entities;
   list_t *eventHooks;
-
+  
+  map_t *map;
+  
   Camera2D *mainCamera;
 
   float deltaTime;
