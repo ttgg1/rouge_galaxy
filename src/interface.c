@@ -8,6 +8,12 @@ interface_t *in_create(uint8_t gridWidth, uint8_t gridHeight, float textSize) {
   res->height = gridHeight;
   res->textSize = textSize;
 
+  res->uiCamera = (Camera2D){.offset = (Vector2){0.0f, 0.0f},
+                             .rotation = 0.0f,
+                             .zoom = 1.0f,
+                             .target = (Vector2){0.0f, 0.0f}};
+  res->uiWindowList = li_emptyList();
+
   // create window
   InitWindow(WIN_W, WIN_H, "Rouge Galaxy");
   SetTargetFPS(240);
@@ -16,16 +22,23 @@ interface_t *in_create(uint8_t gridWidth, uint8_t gridHeight, float textSize) {
   char *relPath;
 #define __LINUX__
 #ifdef __LINUX__
-  relPath = "/../../assets/unifont-15.1.04.otf";
+  relPath = "/../../assets/256font.ttf";
 #else
-  relPath = "\\..\\..\\assets\\unifont-15.1.04.otf";
+  relPath = "\\..\\..\\assets\\256font.ttf";
 #endif
 
   int pathLenght = cwdPathLenght(relPath);
   char path[pathLenght];
   cwdJoinPath(relPath, path);
+
+  // load all codepoints of font
+  int codepoints[256];
+  for (int i = 0; i < 256; ++i) {
+    codepoints[i] = i;
+  }
+
   // LoadFontEx can automatically load codepoints for utf8 support
-  res->font = LoadFont(path);
+  res->font = LoadFontEx(path, (int)res->textSize, codepoints, 255);
 
   // get grid_cell
   res->gridCellSize =
@@ -106,10 +119,52 @@ void in_drawArrayColored(interface_t *interface, char **characters,
   }
 }
 
+void in_addUiWindow(ui_win_t *ui_window, interface_t *interface) {
+  li_push(interface->uiWindowList, ui_window);
+}
+
 void in_drawEntity(interface_t *interface, entity_t *entity) {
   in_drawAtColored(interface, entity->c, entity->color, entity->pos);
 }
 
+static void drawUiWindow(ui_win_t *win, interface_t *in) {
+  /* Vector2 drawPosition = {0.0f, 0.0f}; */
+  /* // TODO: figure out spacing */
+  /* // draw background */
+  /* DrawRectangle(0, 0, win->width * in->font.baseSize * 0.92f, */
+  /*               win->height * in->textSize, in_bg); */
+
+  /* for (int j = 0; j < win->height; ++j) { */
+  /*   drawPosition.y = (float)j * in->textSize; */
+  /*   DrawTextCodepoints(in->font, win->windowBorder[j], win->width,
+   * drawPosition, */
+  /*                      (float)in->textSize, in->font.glyphPadding, */
+  /*                      win->borderColor); */
+  /*   DrawTextEx(in->font, win->text[j], drawPosition, in->textSize, 1.0f, */
+  /*              win->textColor); */
+  /* } */
+  if (win->isShown)
+    DrawTexture(*win->WindowTexture, win->pos.x, win->pos.y, WHITE);
+}
+static void drawUi(interface_t *interface) {
+  node_t *curr = interface->uiWindowList->head;
+
+  BeginMode2D(interface->uiCamera);
+
+  while (curr != NULL) {
+    ui_win_t *curr_val = (ui_win_t *)curr->value;
+
+    // set camera to target  ui text
+    interface->uiCamera.offset =
+        ivec2ToScreenspace(curr_val->pos, interface->gridCellSize);
+
+    drawUiWindow(curr_val, interface);
+
+    curr = curr->next;
+  }
+
+  EndMode2D();
+}
 void in_drawPresent(interface_t *interface, Camera2D *camera) {
   BeginDrawing();
   BeginMode2D(*camera);
@@ -127,6 +182,9 @@ void in_drawPresent(interface_t *interface, Camera2D *camera) {
     pos.x = 0;
   }
 
+  // draw ui stuff
+  drawUi(interface);
+
   //---------------------------------------------------------------
   EndMode2D();
   EndDrawing();
@@ -141,4 +199,18 @@ void in_clearScreen(interface_t *interface) {
   }
 
   ClearBackground(in_bg);
+}
+
+void in_destroyTopUiWindow(interface_t *interface) {
+  // because only push is used it functions like a stack
+  ui_win_t *last = li_pop(interface->uiWindowList);
+  ui_destroyWindow(last);
+}
+
+ui_win_t *in_getUiWindowAtIndex(interface_t *interface, int index) {
+  return (ui_win_t *)li_getAtIndex(interface->uiWindowList, index);
+}
+
+void in_destroyUiWindowAtIndex(interface_t *interface, int index) {
+  li_removeIndex(interface->uiWindowList, index);
 }

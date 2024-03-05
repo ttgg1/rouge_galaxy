@@ -1,9 +1,9 @@
 #ifndef UI_H_
 #define UI_H_
 
-#include "interface.h"
 #include "utils.h"
 #include "vecMath.h"
+#include <ctype.h>
 #include <raylib.h>
 #include <stdint.h>
 #include <string.h>
@@ -21,24 +21,39 @@ typedef enum ui_win_border {
 } ui_win_border_t;
 
 typedef struct ui_window {
+  bool isShown;
   uint16_t width;
   uint16_t height;
+  float glyphWidth;
+  float scaleFactor;
   ivec2_t pos;
-  char **content;
-  Color **colormap;
+  ui_win_border_t borderStyle;
+  char *text;
+  float textSize;
+  float textSpacing;
+  float borderSpacing;
+
+  Color textColor;
+  Color borderColor;
+  Color backgroundColor;
+
+  Texture2D *WindowTexture;
+  Font *font;
 } ui_win_t;
 
 ui_win_t *ui_createWindow(ivec2_t pos, uint16_t width, uint16_t height,
-                          char *text, ui_win_border_t borderStyle,
-                          Color borderColor, Color textColor);
+                          char *text, float textSize,
+                          ui_win_border_t borderStyle, Color textColor,
+                          Color borderColor, Color backgroundColor, Font *font);
 
-void ui_drawWindow(ui_win_t *win, interface_t *in);
+void ui_generateWindowTexture(ui_win_t *win);
+
+// need to regernerate the window texture
 void ui_updateWindowText(ui_win_t *win, char *text);
 void ui_updateWindowTextColor(ui_win_t *win, Color textColor);
 void ui_updateWindowTextAndColor(ui_win_t *win, char *text, Color textColor);
 
 void ui_clearWindowText(ui_win_t *win);
-void ui_clearWindowTextColor(ui_win_t *win);
 
 void ui_destroyWindow(ui_win_t *win);
 

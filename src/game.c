@@ -1,8 +1,17 @@
 #include "game.h"
 
-uint8_t num_entities = 0;
+static uint16_t num_entities = 0;
 
-void checkPlayerBounds(game_t *game) {
+// static internal prototypes
+
+static bool entityOnGrid(entity_t *entity, game_t *game);
+static void loop(game_t *game);
+static void handleEvents(game_t *game);
+static void draw(game_t *game);
+static void updateCamera(game_t *game);
+static void checkPlayerBounds(game_t *game);
+
+static void checkPlayerBounds(game_t *game) {
   ivec2_t plPos = game->player->e->pos;
   int grid_w = game->interface->width;
   int grid_h = game->interface->height;
@@ -24,7 +33,7 @@ void checkPlayerBounds(game_t *game) {
   }
 }
 
-void updateCamera(game_t *game) {
+static void updateCamera(game_t *game) {
   game->mainCamera->zoom += ((float)GetMouseWheelMove() * 0.05f);
 
   if (game->mainCamera->zoom > 3.0f) {
@@ -52,35 +61,31 @@ void updateCamera(game_t *game) {
   }
 }
 
-void drawUi(game_t *game) {
-  node_t *curr = game->uiWindowList->head;
-
-  while (curr != NULL) {
-    ui_win_t *curr_val = (ui_win_t *)curr->value;
-
-    ui_drawWindow(curr_val, game->interface);
-
-    curr = curr->next;
-  }
-}
-
-void draw(game_t *game) {
+static void draw(game_t *game) {
   in_clearScreen(game->interface);
   updateCamera(game);
   // draw stuff
   gm_updateGrid(game);
-  drawUi(game);
 
   in_drawPresent(game->interface, game->mainCamera);
 }
 
-void handleEvents(game_t *game) {
+static void handleEvents(game_t *game) {
   // printf("delta: %f, FPS: %d\n", game->deltaTime, game->fps);
-  pl_handleMovement(game->player, game->deltaTime);
+  pl_handleMovement(game->player);
   checkPlayerBounds(game);
+
+  // call eventhooks
+  node_t *current = game->eventHooks->head;
+  while (current != NULL) {
+    gm_event_func currentFunction = (gm_event_func)current->value;
+    currentFunction(game);
+
+    current = current->next;
+  }
 }
 
-void loop(game_t *game) {
+static void loop(game_t *game) {
   while (game->isRunning && !WindowShouldClose()) {
     game->deltaTime = GetFrameTime();
     game->fps = GetFPS();
@@ -100,6 +105,9 @@ void gm_stop(game_t *game) {
   game->isRunning = false;
   pl_destroyPlayer(game->player);
   in_destroy(game->interface);
+
+  CallFuncOnEveryItem(game->entity_list, en_destroy);
+
   li_destroy(game->entity_list);
   li_destroy(game->active_entities);
   free(game->mainCamera);
@@ -109,10 +117,6 @@ void gm_stop(game_t *game) {
 
 void gm_addEntity(entity_t *entity, game_t *game) {
   li_push(game->entity_list, entity);
-}
-
-void gm_addUiWindow(ui_win_t *ui_window, game_t *game) {
-  li_push(game->uiWindowList, ui_window);
 }
 
 /*
@@ -134,15 +138,17 @@ game_t *gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize) {
 
   // init Camera2D
   g->mainCamera = (Camera2D *)malloc(sizeof(Camera2D));
-  *(g->mainCamera) = (Camera2D){.offset = (Vector2){WIN_W / 2.0f, WIN_H / 2.0f},
-                                .rotation = 0.0f,
-                                .zoom = 1.0f,
-                                .target = ivec2ToVector2(g->player->e->pos)};
+  *(g->mainCamera) =
+      (Camera2D){.offset = (Vector2){WIN_W / 2.0f, WIN_H / 2.0f},
+                 .rotation = 0.0f,
+                 .zoom = 1.0f,
+                 .target = ivec2ToScreenspace(g->player->e->pos,
+                                              g->interface->gridCellSize)};
 
   // init entity linked list
   g->entity_list = li_emptyList();
   g->active_entities = li_emptyList();
-  g->uiWindowList = li_emptyList();
+  g->eventHooks = li_emptyList();
 
   // init map
   g->map = m_create();
@@ -173,7 +179,7 @@ game_t *gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize) {
   return g;
 }
 
-bool gm_entityOnGrid(entity_t *entity, game_t *game) {
+static bool entityOnGrid(entity_t *entity, game_t *game) {
   return entity->pos.x >= game->player->e->pos.x - game->interface->width / 2 &&
          entity->pos.x <= game->player->e->pos.x + game->interface->width / 2 &&
          entity->pos.y >=
@@ -204,17 +210,13 @@ void gm_updateGrid(game_t *game) {
 
   // handle entities
   // TODO: refactor to use active_entities list
+
   node_t *current = game->entity_list->head;
 
   while (current != NULL) {
     entity_t *curr_val = (entity_t *)current->value;
 
-    if (curr_val != NULL && gm_entityOnGrid(curr_val, game)) {
-      /* ivec2_t pos = */
-      /*     (ivec2_t){(int16_t)((curr_val->pos.x) - g->p->e->pos.x + offsetX),
-       */
-      /*               (int16_t)((curr_val->pos.y) - g->p->e->pos.y + offsetY)};
-       */
+    if (curr_val != NULL && entityOnGrid(curr_val, game)) {
       // TODO: add UTF8 support HERE
       in_drawAtColored(game->interface, (char)curr_val->c, curr_val->color,
                        curr_val->pos);
