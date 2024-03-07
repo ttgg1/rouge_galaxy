@@ -1,12 +1,18 @@
 #include "interface.h"
 #include <raylib.h>
 
-interface_t *in_create(uint8_t grid_w, uint8_t grid_h, float ptsize) {
+interface_t *in_create(uint8_t gridWidth, uint8_t gridHeight, float textSize) {
   interface_t *res = malloc(sizeof(interface_t));
 
-  res->w = grid_w;
-  res->h = grid_h;
-  res->ptsize = ptsize;
+  res->width = gridWidth;
+  res->height = gridHeight;
+  res->textSize = textSize;
+
+  res->uiCamera = (Camera2D){.offset = (Vector2){0.0f, 0.0f},
+                             .rotation = 0.0f,
+                             .zoom = 1.0f,
+                             .target = (Vector2){0.0f, 0.0f}};
+  res->uiWindowList = li_emptyList();
 
   // create window
   InitWindow(WIN_W, WIN_H, "Rouge Galaxy");
@@ -16,118 +22,183 @@ interface_t *in_create(uint8_t grid_w, uint8_t grid_h, float ptsize) {
   char *relPath;
 #define __LINUX__
 #ifdef __LINUX__
-  relPath = "/../../assets/unifont-15.1.04.otf";
+  relPath = "/../../assets/256font.ttf";
 #else
-  relPath = "\\..\\..\\assets\\unifont-15.1.04.otf";
+  relPath = "\\..\\..\\assets\\256font.ttf";
 #endif
 
   int pathLenght = cwdPathLenght(relPath);
   char path[pathLenght];
   cwdJoinPath(relPath, path);
+
+  // load all codepoints of font
+  int codepoints[256];
+  for (int i = 0; i < 256; ++i) {
+    codepoints[i] = i;
+  }
+
   // LoadFontEx can automatically load codepoints for utf8 support
-  res->f = LoadFont(path);
+  res->font = LoadFontEx(path, (int)res->textSize, codepoints, 255);
 
   // get grid_cell
-  res->grid_cell = (uint8_t)ceil(0.5f * (WIN_W / res->w + WIN_H / res->h));
+  res->gridCellSize =
+      (uint8_t)ceil(0.5f * (WIN_W / res->width + WIN_H / res->height));
 
   // init Grid
-  res->grid = (int **)malloc(res->h * sizeof(int *));
+  res->grid = (int **)malloc(res->height * sizeof(int *));
 
   // init colormap
-  res->colormap = (Color **)malloc(res->h * sizeof(Color *));
-  for (int j = 0; j < res->h; ++j) {
+  res->colormap = (Color **)malloc(res->height * sizeof(Color *));
+
+  for (int j = 0; j < res->height; ++j) {
     // init cols
-    res->grid[j] = (int *)malloc(res->w * sizeof(int));
-    res->colormap[j] = (Color *)malloc(res->w * sizeof(Color));
+    res->grid[j] = (int *)malloc(res->width * sizeof(int));
+    res->colormap[j] = (Color *)malloc(res->width * sizeof(Color));
   }
 
   return res;
 }
 
-void in_destroy(interface_t *in) {
-  for (int j = 0; j < in->h; ++j) {
-    free(in->grid[j]);
-    free(in->colormap[j]);
+void in_destroy(interface_t *interface) {
+  for (int j = 0; j < interface->height; ++j) {
+    free(interface->grid[j]);
+    free(interface->colormap[j]);
   }
-  free(in->grid);
-  free(in->colormap);
 
-  free(in);
-  UnloadFont(in->f);
+  free(interface->grid);
+  free(interface->colormap);
+
+  free(interface);
+  UnloadFont(interface->font);
   CloseWindow();
 }
 
-void in_drawAt(interface_t *in, char c, ivec2_t pos) {
-  in->grid[pos.x][pos.y] = (int)c;
+void in_drawAt(interface_t *interface, char character, ivec2_t position) {
+  interface->grid[position.y][position.x] = (int)character;
 }
 
-void in_drawAtColored(interface_t *in, char c, Color color, ivec2_t pos) {
-  if (pos.x > in->w || pos.y > in->h) {
+void in_drawAtColored(interface_t *interface, char character, Color color,
+                      ivec2_t position) {
+  if (position.x > interface->width || position.y > interface->height ||
+      position.x < 0 || position.y < 0) {
     debug_print("Tried to draw character out of bounds !\n");
+    return;
   }
 
-  if (in->grid == NULL || in->colormap == NULL) {
+  if (interface->grid == NULL || interface->colormap == NULL) {
     debug_print(
         "Tried to write to an unititialized Grid array or colormap !\n");
+    return;
   } else {
-    in->grid[pos.x][pos.y] = (int)c;
-    in->colormap[pos.x][pos.y] = color;
+    interface->grid[position.y][position.x] = (int)character;
+    interface->colormap[position.y][position.x] = color;
   }
 }
 
-void in_drawArrayColored(interface_t *in, char *chars, Color *colors,
-                         ivec2_t start_pos, int len, int wrap_length) {
-  ivec2_t pos = start_pos;
-  for (int i = 0; i < len; ++i) {
-    // if color is not initialized set it to background color
-    /* if (colors[i].a == 0 && colors[i].r == 0 && colors[i].g == 0 && */
-    /*     colors[i].b == 0) { */
-    /*   colors[i] = in_bg; */
-    /* } */
+void in_drawArrayColored(interface_t *interface, char **characters,
+                         Color **colors, ivec2_t startingPosition, int width,
+                         int height) {
+  if (width > interface->width || height > interface->height) {
+    debug_print("drawArray to big to fit !!\n");
+    return;
+  }
+  ivec2_t pos = startingPosition;
 
-    in_drawAtColored(in, chars[i], colors[i], pos);
+  for (int j = 0; j < height; ++j) {
+    for (int i = 0; i < width; ++i) {
+      in_drawAtColored(interface, characters[j][i], colors[j][i], pos);
+      ++pos.x;
 
-    ++pos.x;
-    if (pos.x > wrap_length) {
-      pos.x = start_pos.x;
-      ++pos.y;
-    }
-    if (pos.y > in->h) {
-      debug_print("Array item Pos out of bounds !!\n");
-      return;
+      if (pos.x > width) {
+        ++pos.y;
+        pos.x = 0;
+
+        if (pos.y > interface->height) {
+          debug_print("Array item Pos out of bounds !!\n");
+          return;
+        }
+      }
     }
   }
 }
 
-void in_drawEntity(interface_t *in, entity_t *e) {
-  in_drawAtColored(in, e->c, e->color, e->pos);
+void in_addUiWindow(ui_win_t *ui_window, interface_t *interface) {
+  li_push(interface->uiWindowList, ui_window);
 }
 
-void in_drawPresent(interface_t *in, Camera2D *cam) {
+void in_drawEntity(interface_t *interface, entity_t *entity) {
+  in_drawAtColored(interface, entity->c, entity->color, entity->pos);
+}
+
+static void drawUiWindow(ui_win_t *win, interface_t *in) {
+  if (win->isShown)
+    DrawTexture(*win->WindowTexture, win->pos.x, win->pos.y, WHITE);
+}
+static void drawUi(interface_t *interface) {
+  node_t *curr = interface->uiWindowList->head;
+
+  BeginMode2D(interface->uiCamera);
+
+  while (curr != NULL) {
+    ui_win_t *curr_val = (ui_win_t *)curr->value;
+
+    // set camera to target  ui text
+    interface->uiCamera.offset =
+        ivec2ToScreenspace(curr_val->pos, interface->gridCellSize);
+
+    drawUiWindow(curr_val, interface);
+
+    curr = curr->next;
+  }
+
+  EndMode2D();
+}
+void in_drawPresent(interface_t *interface, Camera2D *camera) {
   BeginDrawing();
-  BeginMode2D(*cam);
+  BeginMode2D(*camera);
   //---------------------------------------------------------------
   Vector2 pos = {0, 0};
-  for (int j = 0; j < in->h; ++j) {
-    for (int i = 0; i < in->w; ++i) {
-      DrawTextCodepoint(in->f, in->grid[i][j], pos, in->ptsize,
-                        in->colormap[i][j]);
-      pos.x += in->grid_cell;
+
+  for (int j = 0; j < interface->height; ++j) {
+    for (int i = 0; i < interface->width; ++i) {
+      DrawTextCodepoint(interface->font, interface->grid[j][i], pos,
+                        interface->textSize, interface->colormap[j][i]);
+      pos.x += interface->gridCellSize;
     }
-    pos.y += in->grid_cell;
+
+    pos.y += interface->gridCellSize;
     pos.x = 0;
   }
+
+  // draw ui stuff
+  drawUi(interface);
+
   //---------------------------------------------------------------
   EndMode2D();
   EndDrawing();
 }
 
-void in_clearScreen(interface_t *in) {
-  for (int j = 0; j < in->h; ++j) {
-    for (int i = 0; i < in->w; ++i) {
-      in->colormap[i][j] = in_fg;
-      in->grid[i][j] = (int)'.';
+void in_clearScreen(interface_t *interface) {
+  for (int j = 0; j < interface->height; ++j) {
+    for (int i = 0; i < interface->width; ++i) {
+      interface->colormap[j][i] = in_fg;
+      interface->grid[j][i] = (int)'.';
     }
   }
+
   ClearBackground(in_bg);
+}
+
+void in_destroyTopUiWindow(interface_t *interface) {
+  // because only push is used it functions like a stack
+  ui_win_t *last = li_pop(interface->uiWindowList);
+  ui_destroyWindow(last);
+}
+
+ui_win_t *in_getUiWindowAtIndex(interface_t *interface, int index) {
+  return (ui_win_t *)li_getAtIndex(interface->uiWindowList, index);
+}
+
+void in_destroyUiWindowAtIndex(interface_t *interface, int index) {
+  li_removeIndex(interface->uiWindowList, index);
 }

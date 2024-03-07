@@ -5,6 +5,17 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define CallFuncOnEveryItem(__list, __func)                                    \
+  ({                                                                           \
+    do {                                                                       \
+      node_t *__current = __list->head;                                        \
+      while (__current != NULL) {                                              \
+        __func(__current->value);                                              \
+        __current = __current->next;                                           \
+      }                                                                        \
+    } while (0);                                                               \
+  })
+
 typedef struct node {
   void *value;
   struct node *next;

@@ -11,6 +11,8 @@
 #define WIN_H 1000
 
 #include "entity.h"
+#include "list.h"
+#include "ui.h"
 #include "utils.h"
 #include "vecMath.h"
 #include <math.h>
@@ -21,31 +23,42 @@
 #include <raylib.h>
 
 typedef struct interface {
-  uint16_t w;
-  uint16_t h;
-  uint8_t grid_cell;
-  float ptsize;
+  uint16_t width;
+  uint16_t height;
+  uint8_t gridCellSize;
+  float textSize;
   int **grid; // uses raylib codepoints
   Color **colormap;
 
-  Font f;
+  Font font;
+
+  Camera2D uiCamera;
+  list_t *uiWindowList;
+
 } interface_t;
 
-interface_t *in_create(uint8_t grid_w, uint8_t grid_h, float ptsize);
-void in_destroy(interface_t *in);
+interface_t *in_create(uint8_t gridWidth, uint8_t gridHeight, float textSize);
+void in_destroy(interface_t *interface);
 
-void in_drawAt(interface_t *in, char c, ivec2_t pos);
-void in_drawAtColored(interface_t *in, char c, Color color, ivec2_t pos);
+void in_drawAt(interface_t *interface, char character, ivec2_t position);
+void in_drawAtColored(interface_t *interface, char character, Color color,
+                      ivec2_t position);
 
-void in_drawArrayColored(interface_t *in, char *chars, Color *colors,
-                         ivec2_t start_pos, int len, int wrap_length);
+void in_drawArrayColored(interface_t *interface, char **characters,
+                         Color **colors, ivec2_t startingPosition, int width,
+                         int height);
 
-void in_drawEntity(interface_t *in, entity_t *e);
+void in_drawEntity(interface_t *interface, entity_t *entity);
 
+void in_addUiWindow(ui_win_t *ui_window, interface_t *interface);
+void in_destroyTopUiWindow(interface_t *interface);
+// more recently added -> lower index
+ui_win_t *in_getUiWindowAtIndex(interface_t *interface, int index);
+void in_destroyUiWindowAtIndex(interface_t *interface, int index);
 // maybe add support to draw codepoints ?
 
 // needs to be called AFTER draw calls
-void in_drawPresent(interface_t *in, Camera2D *cam);
-void in_clearScreen(interface_t *in);
+void in_drawPresent(interface_t *interface, Camera2D *camera);
+void in_clearScreen(interface_t *interface);
 
 #endif // INTERFACE_H_
