@@ -13,38 +13,38 @@
 #include <unistd.h>
 
 #define create2dArray(__w, __h, __type_t)                                      \
-  ({                                                                           \
-    __type_t **__arr;                                                          \
-    do {                                                                       \
-      __arr = (__type_t **)malloc(__h * sizeof(__type_t *));                   \
-      for (int __i = 0; __i < __h; ++__i) {                                    \
-        __arr[__i] = (__type_t *)malloc(__w * sizeof(__type_t));               \
-      }                                                                        \
-    } while (0);                                                               \
-    __arr;                                                                     \
-  })
+	({                                                                           \
+		__type_t **__arr;                                                          \
+		do {                                                                       \
+			__arr = (__type_t **)malloc(__h * sizeof(__type_t *));                   \
+			for (int __i = 0; __i < __h; ++__i) {                                    \
+				__arr[__i] = (__type_t *)malloc(__w * sizeof(__type_t));               \
+			}                                                                        \
+		} while (0);                                                               \
+		__arr;                                                                     \
+	})
 
 #define free2dArray(__h, __arr)                                                \
-  ({                                                                           \
-    do {                                                                       \
-      for (int __i = 0; __i < __h; ++__i) {                                    \
-        free(__arr[__i]);                                                      \
-      }                                                                        \
-      free(__arr);                                                             \
-    } while (0);                                                               \
-  })
+	({                                                                           \
+		do {                                                                       \
+			for (int __i = 0; __i < __h; ++__i) {                                    \
+				free(__arr[__i]);                                                      \
+			}                                                                        \
+			free(__arr);                                                             \
+		} while (0);                                                               \
+	})
 
 #define debug_print(fmt, ...)                                                  \
-  do {                                                                         \
-    if (DEBUG)                                                                 \
-      fprintf(stderr, "%s:%d:%s(): " fmt, __FILE__, __LINE__, __func__,        \
-              ##__VA_ARGS__);                                                  \
-  } while (0)
+	do {                                                                         \
+		if (DEBUG)                                                                 \
+			fprintf(stderr, "%s:%d:%s(): " fmt, __FILE__, __LINE__, __func__,        \
+			        ##__VA_ARGS__);                                                  \
+	} while (0)
 
-void cwdJoinPath(char *path, char *dest);
+void cwdJoinPath(char* path, char* dest);
 
-int cwdPathLenght(char *path);
+int cwdPathLenght(char* path);
 
-void ut_print2dArray(char **array, unsigned int width, unsigned int height);
+void ut_print2dArray(char** array, unsigned int width, unsigned int height);
 
 #endif // UTILS_H_

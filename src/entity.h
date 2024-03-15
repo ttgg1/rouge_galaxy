@@ -9,12 +9,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 typedef struct entity {
-  uint8_t ID;
-  ivec2_t pos;
-  uint32_t c; // Colored mode supports 32bit encoding, (even emojis)
-  Color color;
+	uint8_t ID;
+	ivec2_t pos;
+	uint32_t c; // Colored mode supports 32bit encoding, (even emojis)
+	Color color;
 } entity_t;
 
 void en_move(entity_t* e, int16_t x_step, int16_t y_step);
