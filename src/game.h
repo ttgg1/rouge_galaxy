@@ -5,46 +5,51 @@
 #include <raymath.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include "entity.h"
 #include "interface.h"
 #include "list.h"
+#include "colors.h"
+#include "map.h"
 #include "player.h"
 #include "ui.h"
 #include "utils.h"
-#include "map.h"
 #include "vecMath.h"
 
 typedef struct game {
-  bool isRunning;
-  interface_t *interface;
-  player_t *player;
+	bool isRunning;
+	bool isSimulating;
+	interface_t* interface;
+	player_t* player;
 
-  list_t *entity_list;
-  list_t *active_entities;
-  list_t *eventHooks;
-  
-  map_t *map;
-  
-  Camera2D *mainCamera;
+	list_t* entity_list;
+	list_t* active_entities;
+	list_t* eventHooks;
 
-  float deltaTime;
-  int fps;
+	map_t* map;
+
+	Camera2D* mainCamera;
+
+	float deltaTime;
+	int fps;
 } game_t;
 
-typedef void (*gm_event_func)(game_t *);
+typedef void (*gm_event_func)(game_t*);
 
-void gm_start(game_t *game);
-void gm_stop(game_t *game);
+void gm_start(game_t* game);
+void gm_stop(game_t* game);
 
-void gm_addEntity(entity_t *entity, game_t *game);
-void gm_addUiWindow(ui_win_t *ui_window, game_t *game);
+int gm_addEntity(entity_t* entity, game_t* game);
+int gm_addEventHook(game_t* game, gm_event_func func);
 
-game_t *gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize);
+void gm_removeEventHookAtIndex(game_t* game, int index);
+void gm_removeEntityAtIndex(game_t* game, int index);
 
-void gm_updateGrid(game_t *game);
+game_t* gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize);
+
+void gm_updateGrid(game_t* game);
 
 #endif // GAME_H_
