@@ -18,6 +18,49 @@ static void characterCreation()
 	// TODO
 }
 
+static void drawPlayerUi(game_t* game)
+{
+	static const int textSize = 25;
+	static const int padding = 5;
+
+	Vector2 pos = {padding, WIN_H - textSize - padding};
+
+	// draw player info to buffer
+	// Class: ... Health: ../.. Power: ../.. Ammo: ../..
+
+	player_t* player = game->player;
+
+	const char* classText;
+
+	switch(game->player->playerClass) {
+	case none:
+		classText = "none";
+		break;
+
+	case soldier:
+		classText = "Soldier";
+		break;
+
+	case scientist:
+		classText = "Scientist";
+		break;
+
+	case engineer:
+		classText = "Engineer";
+		break;
+
+	case spaceMarine:
+		classText = "Space Marine";
+		break;
+	}
+
+	const char* buffer = TextFormat("Class: %s  Health: %d/%d  Power: %d/%d  Ammo: %d/%d", classText, player->currentHealth, player->maxHealth,
+	                                player->currentPower, player->maxPower, player->currentAmmo, player->maxAmmo);
+
+	DrawRectangle(0, (int) pos.y - padding, WIN_W, textSize + 2 * padding, in_windowBackground);
+	DrawTextEx(game->interface->font, buffer, pos, textSize, 1.0f, in_text);
+}
+
 static void handleGameKeys(game_t* game)
 {
 	if (IsKeyPressed(KEY_SPACE)) {
@@ -82,11 +125,25 @@ static void updateCamera(game_t* game)
 static void draw(game_t* game)
 {
 	in_clearScreen(game->interface);
+
+	BeginDrawing();
+	BeginMode2D(*game->mainCamera);
+
+	/* START DRAW ***************************************************************/
+
+	// pre draw stuff
 	updateCamera(game);
-	// draw stuff
 	gm_updateGrid(game);
 
-	in_drawPresent(game->interface, game->mainCamera);
+	// interface drawing
+	in_drawGrid(game->interface, game->mainCamera);
+	in_drawUi(game->interface);
+
+	drawPlayerUi(game);
+	/* END DRAW ********************************************************************/
+
+	EndMode2D();
+	EndDrawing();
 }
 
 static void handleEvents(game_t* game)
@@ -163,10 +220,24 @@ int gm_addEventHook(game_t* game, gm_event_func func)
 	return num_eventHooks;
 }
 
+void gm_removeEntityAtIndex(game_t* game, int index)
+{
+	if(index <= num_eventHooks) {
+		li_removeIndex(game->entity_list, index);
+		--num_entities;
+	} else {
+		debug_print("tried to remove Enitity out of bounds !\n");
+	}
+}
+
 void gm_removeEventHookAtIndex(game_t* game, int index)
 {
-	li_removeIndex(game->eventHooks, index);
-	--num_eventHooks;
+	if(index <= num_eventHooks) {
+		li_removeIndex(game->eventHooks, index);
+		--num_eventHooks;
+	} else {
+		debug_print("tried to remove Eventhook out of bounds !\n");
+	}
 }
 /*
   odd grid_w and grid_h for centered player

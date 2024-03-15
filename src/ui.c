@@ -233,7 +233,7 @@ static void writeText(ui_win_t* win, Image* backgroundImage)
 	UnloadImage(textCanvas);
 }
 
-ui_win_t* ui_createWindow(ivec2_t pos, uint16_t width, uint16_t height,
+ui_win_t* ui_createWindow(Vector2 pos, uint16_t width, uint16_t height,
                           char* text, float textSize,
                           ui_win_border_t borderStyle, Color textColor,
                           Color borderColor, Color backgroundColor,

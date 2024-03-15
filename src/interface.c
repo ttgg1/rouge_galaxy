@@ -151,7 +151,7 @@ static void drawUiWindow(ui_win_t* win, interface_t* in)
 		DrawTexture(*win->WindowTexture, win->pos.x, win->pos.y, WHITE);
 	}
 }
-static void drawUi(interface_t* interface)
+void in_drawUi(interface_t* interface)
 {
 	node_t* curr = interface->uiWindowList->head;
 
@@ -161,8 +161,7 @@ static void drawUi(interface_t* interface)
 		ui_win_t* curr_val = (ui_win_t*)curr->value;
 
 		// set camera to target  ui text
-		interface->uiCamera.offset =
-			        ivec2ToScreenspace(curr_val->pos, interface->gridCellSize);
+		interface->uiCamera.offset = curr_val->pos;
 
 		drawUiWindow(curr_val, interface);
 
@@ -171,11 +170,9 @@ static void drawUi(interface_t* interface)
 
 	EndMode2D();
 }
-void in_drawPresent(interface_t* interface, Camera2D* camera)
+
+void in_drawGrid(interface_t* interface, Camera2D* camera)
 {
-	BeginDrawing();
-	BeginMode2D(*camera);
-	//---------------------------------------------------------------
 	Vector2 pos = {0, 0};
 
 	for (int j = 0; j < interface->height; ++j) {
@@ -188,13 +185,6 @@ void in_drawPresent(interface_t* interface, Camera2D* camera)
 		pos.y += interface->gridCellSize;
 		pos.x = 0;
 	}
-
-	// draw ui stuff
-	drawUi(interface);
-
-	//---------------------------------------------------------------
-	EndMode2D();
-	EndDrawing();
 }
 
 void in_clearScreen(interface_t* interface)

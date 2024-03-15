@@ -26,7 +26,7 @@ typedef struct ui_window {
 	uint16_t height;
 	float glyphWidth;
 	float scaleFactor;
-	ivec2_t pos;
+	Vector2 pos;
 	ui_win_border_t borderStyle;
 	char* text;
 	float textSize;
@@ -41,7 +41,7 @@ typedef struct ui_window {
 	Font* font;
 } ui_win_t;
 
-ui_win_t* ui_createWindow(ivec2_t pos, uint16_t width, uint16_t height,
+ui_win_t* ui_createWindow(Vector2 pos, uint16_t width, uint16_t height,
                           char* text, float textSize,
                           ui_win_border_t borderStyle, Color textColor,
                           Color borderColor, Color backgroundColor, Font* font);

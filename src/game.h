@@ -12,6 +12,7 @@
 #include "entity.h"
 #include "interface.h"
 #include "list.h"
+#include "colors.h"
 #include "map.h"
 #include "player.h"
 #include "ui.h"
@@ -45,6 +46,7 @@ int gm_addEntity(entity_t* entity, game_t* game);
 int gm_addEventHook(game_t* game, gm_event_func func);
 
 void gm_removeEventHookAtIndex(game_t* game, int index);
+void gm_removeEntityAtIndex(game_t* game, int index);
 
 game_t* gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize);
 

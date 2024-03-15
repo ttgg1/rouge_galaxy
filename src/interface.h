@@ -1,8 +1,8 @@
 #ifndef INTERFACE_H_
 #define INTERFACE_H_
 
-#define WIN_W 1000
-#define WIN_H 1000
+#define WIN_W 1920
+#define WIN_H 1080
 
 #include "entity.h"
 #include "list.h"
@@ -53,7 +53,8 @@ void in_destroyUiWindowAtIndex(interface_t* interface, int index);
 // maybe add support to draw codepoints ?
 
 // needs to be called AFTER draw calls
-void in_drawPresent(interface_t* interface, Camera2D* camera);
+void in_drawGrid(interface_t* interface, Camera2D* camera);
+void in_drawUi(interface_t* interface);
 void in_clearScreen(interface_t* interface);
 
 #endif // INTERFACE_H_
