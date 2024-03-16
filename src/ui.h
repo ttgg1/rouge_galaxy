@@ -47,7 +47,7 @@ ui_win_t* ui_createWindow(Vector2 pos, uint16_t width, uint16_t height,
                           Color borderColor, Color backgroundColor, Font* font);
 
 void ui_generateWindowTexture(ui_win_t* win);
-
+void ui_drawUiWindow(ui_win_t* win);
 // need to regernerate the window texture
 void ui_updateWindowText(ui_win_t* win, char* text);
 void ui_updateWindowTextColor(ui_win_t* win, Color textColor);

@@ -145,12 +145,6 @@ void in_drawEntity(interface_t* interface, entity_t* entity)
 	in_drawAtColored(interface, entity->c, entity->color, entity->pos);
 }
 
-static void drawUiWindow(ui_win_t* win, interface_t* in)
-{
-	if (win->isShown) {
-		DrawTexture(*win->WindowTexture, win->pos.x, win->pos.y, WHITE);
-	}
-}
 void in_drawUi(interface_t* interface)
 {
 	node_t* curr = interface->uiWindowList->head;
@@ -163,7 +157,7 @@ void in_drawUi(interface_t* interface)
 		// set camera to target  ui text
 		interface->uiCamera.offset = curr_val->pos;
 
-		drawUiWindow(curr_val, interface);
+		ui_drawUiWindow(curr_val);
 
 		curr = curr->next;
 	}

@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include "uiInput.h"
 // the index of the upper most
 static int16_t num_entities = -1;
 static int16_t num_eventHooks = -1;
@@ -63,8 +64,15 @@ static void drawPlayerUi(game_t* game)
 
 static void handleGameKeys(game_t* game)
 {
+	char* temp;
+
 	if (IsKeyPressed(KEY_SPACE)) {
 		game->isSimulating = !game->isSimulating;
+	}
+
+	if(IsKeyPressed(KEY_K)) {
+		temp = uiI_openPopup(game, "halli hallo \n halloooo", false);
+		printf("%s\n", temp);
 	}
 }
 

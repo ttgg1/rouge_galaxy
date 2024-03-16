@@ -3,10 +3,7 @@
 
 #include "entity.h"
 #include "game.h"
-#include "interface.h"
-#include "ui.h"
 #include "vecMath.h"
-#include "map.h"
 
 int main(int argc, char** argv)
 {
@@ -19,6 +16,7 @@ int main(int argc, char** argv)
 
 	gm_addEntity(entity1, game);
 	gm_addEntity(entity2, game);
+
 	gm_start(game);
 
 	gm_stop(game);

@@ -280,7 +280,12 @@ void ui_generateWindowTexture(ui_win_t* win)
 
 	UnloadImage(backgroundImage);
 }
-
+void ui_drawUiWindow(ui_win_t* win)
+{
+	if (win->isShown) {
+		DrawTexture(*win->WindowTexture, win->pos.x, win->pos.y, WHITE);
+	}
+}
 void ui_clearWindowText(ui_win_t* win)
 {
 	win->text[0] = (char)'\0';

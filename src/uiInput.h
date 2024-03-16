@@ -13,16 +13,7 @@
 #define POPUP_TEXTSIZE 20
 #define POPUP_BUFFERSIZE 255
 
-// window, where a user can input text
-typedef struct ui_inputWindow {
-	ui_win_t* window;
-
-	bool showInput;
-
-	char* inputString;
-} ui_inputWindow_t;
-
 // waits for input, closes with Enter -> returns input
-char* openPopup(game_t* game, char* text, bool showInput);
+extern char* uiI_openPopup(game_t* game, char* text, bool showInput);
 
 #endif // UIINPUT_H_
