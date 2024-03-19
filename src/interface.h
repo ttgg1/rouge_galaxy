@@ -49,7 +49,7 @@ int in_addUiWindow(ui_win_t* ui_window, interface_t* interface);
 void in_destroyTopUiWindow(interface_t* interface);
 // more recently added -> lower index
 ui_win_t* in_getUiWindowAtIndex(interface_t* interface, int index);
-void in_destroyUiWindowAtIndex(interface_t* interface, int index);
+void in_removeUiWindowAtIndex(interface_t* interface, int index);
 // maybe add support to draw codepoints ?
 
 // needs to be called AFTER draw calls

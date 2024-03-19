@@ -1,12 +1,16 @@
 #include "game.h"
 
 #include "uiInput.h"
+
+/* GLOBALS *********************************************************************/
 // the index of the upper most
 static int16_t num_entities = -1;
+
 static int16_t num_eventHooks = -1;
+static int16_t num_alwaysEventHooks = -1;
+static int16_t num_notSimulatingEventHooks = -1;
 
-// static internal prototypes
-
+/* PROTOTYPES ****************************************************************/
 static bool entityOnGrid(entity_t* entity, game_t* game);
 static void loop(game_t* game);
 static void handleEvents(game_t* game);
@@ -14,6 +18,7 @@ static void draw(game_t* game);
 static void updateCamera(game_t* game);
 static void checkPlayerBounds(game_t* game);
 
+/* STATIC FUNCTUIONS ************************************************************************/
 static void characterCreation()
 {
 	// TODO
@@ -62,17 +67,20 @@ static void drawPlayerUi(game_t* game)
 	DrawTextEx(game->interface->font, buffer, pos, textSize, 1.0f, in_text);
 }
 
+static void testCallback(char* text)
+{
+	printf("Input from Popup: %s\n", text);
+	free(text);
+}
+
 static void handleGameKeys(game_t* game)
 {
-	char* temp;
-
 	if (IsKeyPressed(KEY_SPACE)) {
 		game->isSimulating = !game->isSimulating;
 	}
 
 	if(IsKeyPressed(KEY_K)) {
-		temp = uiI_openPopup(game, "halli hallo \n halloooo", false);
-		printf("%s\n", temp);
+		//uiI_openPopup(game, "Please Input something: ", true, testCallback);
 	}
 }
 
@@ -173,23 +181,92 @@ static void handleEvents(game_t* game)
 	}
 }
 
+static void handleNotSimulatingEvents(game_t* game)
+{
+	// call eventhooks
+	if(num_notSimulatingEventHooks > -1) {
+		node_t* current = game->notSimulatingEventHooks->head;
+
+		while (current != NULL) {
+			gm_event_func currentFunction = (gm_event_func)current->value;
+			currentFunction(game);
+
+			current = current->next;
+		}
+	}
+}
+
+static void handleAlwaysEvents(game_t* game)
+{
+
+	game->deltaTime = GetFrameTime();
+	game->fps = GetFPS();
+
+	// handles Keyboard Events (e.g. pausing the game)
+	if(!game->isInputCaptured) { handleGameKeys(game); }
+
+	// call eventhooks
+	if(num_alwaysEventHooks > -1) {
+		node_t* current = game->alwaysEventHooks->head;
+		node_t* currentData = game->alwaysEventHooksData->head;
+		int counter = 0;
+		int dataIndex = 0;
+
+		// get index of first data entry
+		if(currentData != NULL) {
+			dataIndex = ((gm_event_func_data_struct_t*) currentData->value)->index;
+		}
+
+		while (current != NULL) {
+			gm_event_func currentFunction = (gm_event_func)current->value;
+
+			if(counter == dataIndex) {
+				gm_event_func_data_struct_t* currentDataValue = (gm_event_func_data_struct_t*)currentData->value;
+
+				// TODO: Maybe cast needed ?
+				currentFunction(game, currentDataValue->dataStruct);
+
+				currentData = currentData->next;
+
+				// TODO: TEST & implement for other types of hooks
+				if(currentData != NULL) {
+					dataIndex = ((gm_event_func_data_struct_t*) currentData->value)->index;
+				}
+			} else {
+				currentFunction(game);
+			}
+
+			current = current->next;
+			++counter;
+		}
+	}
+}
 static void loop(game_t* game)
 {
 	while (game->isRunning && !WindowShouldClose()) {
-		game->deltaTime = GetFrameTime();
-		game->fps = GetFPS();
 
-		// handles Keyboard Events in paused state
-		handleGameKeys(game);
+		handleAlwaysEvents(game);
 
 		if (game->isSimulating) {
 			handleEvents(game);
+		} else {
+			handleNotSimulatingEvents(game);
 		}
 
 		draw(game);
 	}
 }
 
+static bool entityOnGrid(entity_t* entity, game_t* game)
+{
+	return entity->pos.x >= game->player->e->pos.x - game->interface->width / 2 &&
+		       entity->pos.x <= game->player->e->pos.x + game->interface->width / 2 &&
+		       entity->pos.y >=
+		       game->player->e->pos.y - game->interface->height / 2 &&
+		       entity->pos.y <= game->player->e->pos.y + game->interface->height / 2;
+}
+
+/*API FUNCTIONS***************************************************************/
 void gm_start(game_t* game)
 {
 	game->isRunning = true;
@@ -223,9 +300,34 @@ int gm_addEntity(entity_t* entity, game_t* game)
 
 int gm_addEventHook(game_t* game, gm_event_func func)
 {
-	li_push(game->eventHooks, func);
+	li_push(game->eventHooks, (void*) func);
 	++num_eventHooks;
 	return num_eventHooks;
+}
+int gm_addAlwaysEventHook(game_t* game, gm_event_func func)
+{
+	li_push(game->alwaysEventHooks, (void*) func);
+	++num_alwaysEventHooks;
+	return num_alwaysEventHooks;
+}
+int gm_addNotSimulatingEventHook(game_t* game, gm_event_func func)
+{
+	li_push(game->notSimulatingEventHooks, (void*) func);
+	++num_notSimulatingEventHooks;
+	return num_notSimulatingEventHooks;
+}
+
+void gm_addEventHookData(game_t* game, gm_event_func_data_struct_t* data)
+{
+	li_push(game->eventHooksData, (void*) data);
+}
+void gm_addAlwaysEventHookData(game_t* game, gm_event_func_data_struct_t* data)
+{
+	li_push(game->alwaysEventHooksData, (void*) data);
+}
+void gm_addNotSimulatingEventHookData(game_t* game, gm_event_func_data_struct_t* data)
+{
+	li_push(game->notSimulatingEventHooksData, (void*) data);
 }
 
 void gm_removeEntityAtIndex(game_t* game, int index)
@@ -237,12 +339,30 @@ void gm_removeEntityAtIndex(game_t* game, int index)
 		debug_print("tried to remove Enitity out of bounds !\n");
 	}
 }
-
+// TODO: delete EventHookData
 void gm_removeEventHookAtIndex(game_t* game, int index)
 {
 	if(index <= num_eventHooks) {
 		li_removeIndex(game->eventHooks, index);
 		--num_eventHooks;
+	} else {
+		debug_print("tried to remove Eventhook out of bounds !\n");
+	}
+}
+void gm_removeAlwaysEventHookAtIndex(game_t* game, int index)
+{
+	if(index <= num_alwaysEventHooks) {
+		li_removeIndex(game->alwaysEventHooks, index);
+		--num_alwaysEventHooks;
+	} else {
+		debug_print("tried to remove Eventhook out of bounds !\n");
+	}
+}
+void gm_removeNotSimulatingEventHookAtIndex(game_t* game, int index)
+{
+	if(index <= num_notSimulatingEventHooks) {
+		li_removeIndex(game->notSimulatingEventHooks, index);
+		--num_notSimulatingEventHooks;
 	} else {
 		debug_print("tried to remove Eventhook out of bounds !\n");
 	}
@@ -281,7 +401,17 @@ game_t* gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize)
 	// init entity linked list
 	g->entity_list = li_emptyList();
 	g->active_entities = li_emptyList();
+
 	g->eventHooks = li_emptyList();
+	g->eventHooksData = li_emptyList();
+
+	g->alwaysEventHooks = li_emptyList();
+	g->alwaysEventHooksData = li_emptyList();
+
+	g->notSimulatingEventHooks = li_emptyList();
+	g->notSimulatingEventHooksData = li_emptyList();
+
+	g->isInputCaptured = false;
 
 	// init map
 	g->map = m_create();
@@ -318,15 +448,6 @@ game_t* gm_init(uint8_t gridWidth, uint8_t gridHeight, uint8_t textSize)
 	gm_addEntity(g->player->e, g);
 
 	return g;
-}
-
-static bool entityOnGrid(entity_t* entity, game_t* game)
-{
-	return entity->pos.x >= game->player->e->pos.x - game->interface->width / 2 &&
-		       entity->pos.x <= game->player->e->pos.x + game->interface->width / 2 &&
-		       entity->pos.y >=
-		       game->player->e->pos.y - game->interface->height / 2 &&
-		       entity->pos.y <= game->player->e->pos.y + game->interface->height / 2;
 }
 
 void gm_updateGrid(game_t* game)

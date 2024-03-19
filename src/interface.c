@@ -206,7 +206,7 @@ ui_win_t* in_getUiWindowAtIndex(interface_t* interface, int index)
 	return (ui_win_t*)li_getAtIndex(interface->uiWindowList, index);
 }
 
-void in_destroyUiWindowAtIndex(interface_t* interface, int index)
+void in_removeUiWindowAtIndex(interface_t* interface, int index)
 {
 	li_removeIndex(interface->uiWindowList, index);
 	--uiWindowCount;

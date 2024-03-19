@@ -7,7 +7,7 @@
 * Game.c
 - +draw function -> iterate entity list+
 - +gameloop+ -> turn based mode
-- if no encounter -> real time mode -> bool isTurnBased in gamestruct
+- [ ] if no encounter -> real time mode -> bool isSimulating in gamestruct
 - +game struct+
 
 * interface.c
@@ -17,11 +17,14 @@
 
 * Procedrual dungeon generation with WFC
 * list.c
-- on destroy functin pointer, which is called on destroy on every object to free
+- [ ] on destroy function pointer, which is called on destroy on every object to free
 * ui.c
-- open textbox
-- select items
+- [X] open textbox
+- select items -> uiInput
 - look like pokemon fight menu
+
+* uiInput.c
+- [ ] open popup window, waiting for input -> capture keypresses -> spawn thread, which handles the input capture or game Event hook
 
 * enemy.c
 - handle fights with the player
